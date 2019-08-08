@@ -31,49 +31,49 @@ always @(*)
   // For R-type instructions
   case (Funct)
     6'b00_0000:
-      aluFunct <= ALU_SLL;
+      aluFunct = ALU_SLL;
     6'b00_0010:
-      aluFunct <= ALU_SRL;
+      aluFunct = ALU_SRL;
     6'b00_0011:
-      aluFunct <= ALU_SRA;
+      aluFunct = ALU_SRA;
     6'b10_0000:
-      aluFunct <= ALU_ADD;
+      aluFunct = ALU_ADD;
     6'b10_0001:
-      aluFunct <= ALU_ADD;
+      aluFunct = ALU_ADD;
     6'b10_0010:
-      aluFunct <= ALU_SUB;
+      aluFunct = ALU_SUB;
     6'b10_0011:
-      aluFunct <= ALU_SUB;
+      aluFunct = ALU_SUB;
     6'b10_0100:
-      aluFunct <= ALU_AND;
+      aluFunct = ALU_AND;
     6'b10_0101:
-      aluFunct <= ALU_OR;
+      aluFunct = ALU_OR;
     6'b10_0110:
-      aluFunct <= ALU_XOR;
+      aluFunct = ALU_XOR;
     6'b10_0111:
-      aluFunct <= ALU_NOR;
+      aluFunct = ALU_NOR;
     6'b10_1010:
-      aluFunct <= ALU_SLT;
+      aluFunct = ALU_SLT;
     6'b10_1011:
-      aluFunct <= ALU_SLT;
+      aluFunct = ALU_SLT;
     default:
-      aluFunct <= ALU_ADD;
+      aluFunct = ALU_ADD;
   endcase
 
 always @(*)
   case (ALUOp[2:0])
     3'b000:
-      ALUCtl <= ALU_ADD;
+      ALUCtl = ALU_ADD;
     3'b001:
-      ALUCtl <= ALU_SUB;
+      ALUCtl = ALU_SUB;
     3'b100:
-      ALUCtl <= ALU_AND;
+      ALUCtl = ALU_AND;
     3'b101:
-      ALUCtl <= ALU_SLT;
+      ALUCtl = ALU_SLT;
     3'b010:
-      ALUCtl <= aluFunct;
+      ALUCtl = aluFunct;
     default:
-      ALUCtl <= ALU_ADD;
+      ALUCtl = ALU_ADD;
   endcase
 
 endmodule
