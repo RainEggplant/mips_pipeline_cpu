@@ -62,8 +62,8 @@ assign alu_in_2 = ALUSrc2? lu_out: data_bus_reg_b;
 ALU alu1(.in_1(alu_in_1), .in_2(alu_in_2), .ALUCtl(ALUCtl), .Sign(Sign), .out(alu_out), .zero(Zero));
 
 wire [31:0] read_data;
-DataMemory data_mem_1(.clk(clk), .reset(reset), .address(alu_out), .write_data(data_bus_reg_b),
-                      .read_data(read_data), .MemRead(MemRead), .MemWrite(MemWrite));
+DataMemory data_mem_1(.clk(clk), .MemRead(MemRead), .MemWrite(MemWrite), .address(alu_out),
+                      .write_data(data_bus_reg_b), .read_data(read_data));
 assign data_bus_mem = (MemtoReg == 2'b00)? alu_out: (MemtoReg == 2'b01)? read_data: pc_plus_4;
 
 wire [31:0] jump_target;
