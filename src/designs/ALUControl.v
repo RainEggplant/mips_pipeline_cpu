@@ -4,16 +4,16 @@ input [5:0] Funct;
 output reg [4:0] ALUCtl;
 output Sign;
 
-parameter aluAND = 5'b00000;
-parameter aluOR  = 5'b00001;
-parameter aluADD = 5'b00010;
-parameter aluSUB = 5'b00110;
-parameter aluSLT = 5'b00111;
-parameter aluNOR = 5'b01100;
-parameter aluXOR = 5'b01101;
-parameter aluSLL = 5'b10000;
-parameter aluSRL = 5'b11000;
-parameter aluSRA = 5'b11001;
+parameter ALU_AND = 5'b00000;
+parameter ALU_OR  = 5'b00001;
+parameter ALU_ADD = 5'b00010;
+parameter ALU_SUB = 5'b00110;
+parameter ALU_SLT = 5'b00111;
+parameter ALU_NOR = 5'b01100;
+parameter ALU_XOR = 5'b01101;
+parameter ALU_SLL = 5'b10000;
+parameter ALU_SRL = 5'b11000;
+parameter ALU_SRA = 5'b11001;
 
 // ALUOp[2:0] == 3'b010 includes the following instructions (R-type and jr, jalr):
 //   add, addu, sub, subu, and, or, xor, nor, sll, srl, sra, slt, sltu, jr, jalr
@@ -31,49 +31,49 @@ always @(*)
   // For R-type instructions
   case (Funct)
     6'b00_0000:
-      aluFunct <= aluSLL;
+      aluFunct <= ALU_SLL;
     6'b00_0010:
-      aluFunct <= aluSRL;
+      aluFunct <= ALU_SRL;
     6'b00_0011:
-      aluFunct <= aluSRA;
+      aluFunct <= ALU_SRA;
     6'b10_0000:
-      aluFunct <= aluADD;
+      aluFunct <= ALU_ADD;
     6'b10_0001:
-      aluFunct <= aluADD;
+      aluFunct <= ALU_ADD;
     6'b10_0010:
-      aluFunct <= aluSUB;
+      aluFunct <= ALU_SUB;
     6'b10_0011:
-      aluFunct <= aluSUB;
+      aluFunct <= ALU_SUB;
     6'b10_0100:
-      aluFunct <= aluAND;
+      aluFunct <= ALU_AND;
     6'b10_0101:
-      aluFunct <= aluOR;
+      aluFunct <= ALU_OR;
     6'b10_0110:
-      aluFunct <= aluXOR;
+      aluFunct <= ALU_XOR;
     6'b10_0111:
-      aluFunct <= aluNOR;
+      aluFunct <= ALU_NOR;
     6'b10_1010:
-      aluFunct <= aluSLT;
+      aluFunct <= ALU_SLT;
     6'b10_1011:
-      aluFunct <= aluSLT;
+      aluFunct <= ALU_SLT;
     default:
-      aluFunct <= aluADD;
+      aluFunct <= ALU_ADD;
   endcase
 
 always @(*)
   case (ALUOp[2:0])
     3'b000:
-      ALUCtl <= aluADD;
+      ALUCtl <= ALU_ADD;
     3'b001:
-      ALUCtl <= aluSUB;
+      ALUCtl <= ALU_SUB;
     3'b100:
-      ALUCtl <= aluAND;
+      ALUCtl <= ALU_AND;
     3'b101:
-      ALUCtl <= aluSLT;
+      ALUCtl <= ALU_SLT;
     3'b010:
       ALUCtl <= aluFunct;
     default:
-      ALUCtl <= aluADD;
+      ALUCtl <= ALU_ADD;
   endcase
 
 endmodule

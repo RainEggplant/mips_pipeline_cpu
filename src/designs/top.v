@@ -3,5 +3,5 @@ input reset, sysclk;
 output led;
 
 CPU cpu1(reset, sysclk);
-assign led = cpu1.PC[0];
+assign led = cpu1.pc[0];
 endmodule

@@ -1,19 +1,19 @@
 module CPU(reset, clk);
 input reset, clk;
 
-reg [31:0] PC;
-wire [31:0] PC_next;
+reg [31:0] pc;
+wire [31:0] pc_next;
 always @(posedge reset or posedge clk)
   if (reset)
-    PC <= 32'h00000000;
+    pc <= 32'h00000000;
   else
-    PC <= PC_next;
+    pc <= pc_next;
 
-wire [31:0] PC_plus_4;
-assign PC_plus_4 = PC + 32'd4;
+wire [31:0] pc_plus_4;
+assign pc_plus_4 = pc + 32'd4;
 
-wire [31:0] Instruction;
-InstructionMemory instruction_memory1(.Address(PC), .Instruction(Instruction));
+wire [31:0] instruction;
+InstructionMemory instr_mem_1(.address(pc), .instruction(instruction));
 
 wire [1:0] RegDst;
 wire [1:0] PCSrc;
@@ -28,49 +28,51 @@ wire ALUSrc1;
 wire ALUSrc2;
 wire RegWrite;
 
-Control control1(
-          .OpCode(Instruction[31:26]), .Funct(Instruction[5:0]),
-          .PCSrc(PCSrc), .Branch(Branch), .RegWrite(RegWrite), .RegDst(RegDst),
-          .MemRead(MemRead),	.MemWrite(MemWrite), .MemtoReg(MemtoReg),
-          .ALUSrc1(ALUSrc1), .ALUSrc2(ALUSrc2), .ExtOp(ExtOp), .LuOp(LuOp),	.ALUOp(ALUOp));
+Control control_1(.OpCode(instruction[31:26]), .Funct(instruction[5:0]),
+                  .PCSrc(PCSrc), .Branch(Branch), .RegWrite(RegWrite), .RegDst(RegDst),
+                  .MemRead(MemRead),	.MemWrite(MemWrite), .MemtoReg(MemtoReg),
+                  .ALUSrc1(ALUSrc1), .ALUSrc2(ALUSrc2), .ExtOp(ExtOp), .LuOp(LuOp),	.ALUOp(ALUOp));
 
-wire [31:0] Databus1, Databus2, Databus3;
-wire [4:0] Write_register;
-assign Write_register = (RegDst == 2'b00)? Instruction[20:16]: (RegDst == 2'b01)? Instruction[15:11]: 5'b11111;
-RegisterFile register_file1(.reset(reset), .clk(clk), .RegWrite(RegWrite),
-                            .Read_register1(Instruction[25:21]), .Read_register2(Instruction[20:16]), .Write_register(Write_register),
-                            .Write_data(Databus3), .Read_data1(Databus1), .Read_data2(Databus2));
+wire [31:0] data_bus_reg_a;
+wire [31:0] data_bus_reg_b;
+wire [31:0] data_bus_mem;
+wire [4:0] write_addr;
+assign write_addr = (RegDst == 2'b00)? instruction[20:16]: (RegDst == 2'b01)? instruction[15:11]: 5'b11111;
+RegisterFile reg_file_1(.clk(clk), .reset(reset),
+                        .RegWrite(RegWrite), .write_addr(write_addr), .write_data(data_bus_mem),
+                        .read_addr_1(instruction[25:21]), .read_addr_2(instruction[20:16]),
+                        .read_data_1(data_bus_reg_a), .read_data_2(data_bus_reg_b));
 
-wire [31:0] Ext_out;
-assign Ext_out = {ExtOp? {16{Instruction[15]}}: 16'h0000, Instruction[15:0]};
+wire [31:0] ext_out;
+assign ext_out = {ExtOp? {16{instruction[15]}}: 16'h0000, instruction[15:0]};
 
-wire [31:0] LU_out;
-assign LU_out = LuOp? {Instruction[15:0], 16'h0000}: Ext_out;
+wire [31:0] lu_out;
+assign lu_out = LuOp? {instruction[15:0], 16'h0000}: ext_out;
 
 wire [4:0] ALUCtl;
 wire Sign;
-ALUControl alu_control1(.ALUOp(ALUOp), .Funct(Instruction[5:0]), .ALUCtl(ALUCtl), .Sign(Sign));
+ALUControl alu_control_1(.ALUOp(ALUOp), .Funct(instruction[5:0]), .ALUCtl(ALUCtl), .Sign(Sign));
 
-wire [31:0] ALU_in1;
-wire [31:0] ALU_in2;
-wire [31:0] ALU_out;
+wire [31:0] alu_in_1;
+wire [31:0] alu_in_2;
+wire [31:0] alu_out;
 wire Zero;
-assign ALU_in1 = ALUSrc1? {17'h00000, Instruction[10:6]}: Databus1; // Should this be 27'h0000000?
-assign ALU_in2 = ALUSrc2? LU_out: Databus2;
-ALU alu1(.in1(ALU_in1), .in2(ALU_in2), .ALUCtl(ALUCtl), .Sign(Sign), .out(ALU_out), .zero(Zero));
+assign alu_in_1 = ALUSrc1? {27'h00000, instruction[10:6]}: data_bus_reg_a;
+assign alu_in_2 = ALUSrc2? lu_out: data_bus_reg_b;
+ALU alu1(.in_1(alu_in_1), .in_2(alu_in_2), .ALUCtl(ALUCtl), .Sign(Sign), .out(alu_out), .zero(Zero));
 
-wire [31:0] Read_data;
-DataMemory data_memory1(.reset(reset), .clk(clk), .Address(ALU_out), .Write_data(Databus2),
-                        .Read_data(Read_data), .MemRead(MemRead), .MemWrite(MemWrite));
-assign Databus3 = (MemtoReg == 2'b00)? ALU_out: (MemtoReg == 2'b01)? Read_data: PC_plus_4;
+wire [31:0] read_data;
+DataMemory data_mem_1(.clk(clk), .reset(reset), .address(alu_out), .write_data(data_bus_reg_b),
+                      .read_data(read_data), .MemRead(MemRead), .MemWrite(MemWrite));
+assign data_bus_mem = (MemtoReg == 2'b00)? alu_out: (MemtoReg == 2'b01)? read_data: pc_plus_4;
 
-wire [31:0] Jump_target;
-assign Jump_target = {PC_plus_4[31:28], Instruction[25:0], 2'b00};
+wire [31:0] jump_target;
+assign jump_target = {pc_plus_4[31:28], instruction[25:0], 2'b00};
 
-wire [31:0] Branch_target;
-assign Branch_target = (Branch & Zero)? PC_plus_4 + {LU_out[29:0], 2'b00}: PC_plus_4;
+wire [31:0] branch_target;
+assign branch_target = (Branch & Zero)? pc_plus_4 + {lu_out[29:0], 2'b00}: pc_plus_4;
 
-assign PC_next = (PCSrc == 2'b00)? Branch_target: (PCSrc == 2'b01)? Jump_target: Databus1;
+assign pc_next = (PCSrc == 2'b00)? branch_target: (PCSrc == 2'b01)? jump_target: data_bus_reg_a;
 
 endmodule
 
