@@ -1,4 +1,4 @@
 {
-  "systemverilog.verilator.launchConfiguration": "\"D:\\Program Files\\verilator\\verilator\" -sv --lint-only --language 1800-2012 --Wall -y \"f:\\dev\\hardware\\vivado\\mips_pipeline_cpu\\src\\designs\"",
+  "systemverilog.verilator.launchConfiguration": "\"D:\\Program Files\\verilator\\verilator\" -sv --lint-only --language 1800-2012 --Wall -y \"f:\\dev\\hardware\\vivado\\mips_pipeline_cpu\\src\\designs\" -y \"f:\\dev\\hardware\\vivado\\mips_pipeline_cpu\\src\\designs\\pipeline_registers\"",
   "systemverilog.verilator.compileOnSave": true
 }
