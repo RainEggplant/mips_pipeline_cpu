@@ -118,9 +118,8 @@ set_property -name "webtalk.modelsim_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.questa_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.riviera_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.vcs_export_sim" -value "1" -objects $obj
-set_property -name "webtalk.xcelium_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.xsim_export_sim" -value "1" -objects $obj
-set_property -name "webtalk.xsim_launch_sim" -value "6" -objects $obj
+set_property -name "webtalk.xsim_launch_sim" -value "16" -objects $obj
 
 # Create 'sources_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sources_1] ""]} {
@@ -135,6 +134,8 @@ set files [list \
  [file normalize "${origin_dir}/src/designs/CPU.v"] \
  [file normalize "${origin_dir}/src/designs/Control.v"] \
  [file normalize "${origin_dir}/src/designs/DataMemory.v"] \
+ [file normalize "${origin_dir}/src/designs/pipeline_registers/ID_EX_reg.v"] \
+ [file normalize "${origin_dir}/src/designs/pipeline_registers/IF_ID_reg.v"] \
  [file normalize "${origin_dir}/src/designs/InstructionMemory.v"] \
  [file normalize "${origin_dir}/src/designs/RegisterFile.v"] \
  [file normalize "${origin_dir}/src/designs/top.v"] \
@@ -150,7 +151,6 @@ add_files -norecurse -fileset $obj $files
 # Set 'sources_1' fileset properties
 set obj [get_filesets sources_1]
 set_property -name "top" -value "top" -objects $obj
-set_property -name "top_auto_set" -value "0" -objects $obj
 
 # Create 'constrs_1' fileset (if not found)
 if {[string equal [get_filesets -quiet constrs_1] ""]} {
@@ -190,6 +190,30 @@ set_property -name "top" -value "test_cpu" -objects $obj
 set_property -name "top_auto_set" -value "0" -objects $obj
 set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
 
+# Create 'register_file_tb' fileset (if not found)
+if {[string equal [get_filesets -quiet register_file_tb] ""]} {
+  create_fileset -simset register_file_tb
+}
+
+# Set 'register_file_tb' fileset object
+set obj [get_filesets register_file_tb]
+set files [list \
+ [file normalize "${origin_dir}/src/testbenches/RegisterFile_tb.v"] \
+]
+add_files -norecurse -fileset $obj $files
+
+# Set 'register_file_tb' fileset file properties for remote files
+# None
+
+# Set 'register_file_tb' fileset file properties for local files
+# None
+
+# Set 'register_file_tb' fileset properties
+set obj [get_filesets register_file_tb]
+set_property -name "top" -value "RegisterFile_tb" -objects $obj
+set_property -name "top_auto_set" -value "0" -objects $obj
+set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
+
 # Set 'utils_1' fileset object
 set obj [get_filesets utils_1]
 # Empty (no sources present)
@@ -218,6 +242,7 @@ set_property -name "display_name" -value "synth_1_synth_report_utilization_0" -o
 
 }
 set obj [get_runs synth_1]
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "part" -value "xc7a35tcsg324-1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
