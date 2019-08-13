@@ -1,3 +1,5 @@
+/* verilator lint_off WIDTH */
+
 module ALU(in_1, in_2, ALUCtl, Sign, out, zero);
 input [31:0] in_1, in_2;
 input [4:0] ALUCtl;

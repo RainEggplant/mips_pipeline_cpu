@@ -1,7 +1,9 @@
-module RegisterFile(clk, reset,
-                    RegWrite, write_addr, write_data,
-                    read_addr_1, read_addr_2,
-                    read_data_1, read_data_2);
+module RegisterFile(
+         clk, reset,
+         RegWrite, write_addr, write_data,
+         read_addr_1, read_addr_2,
+         read_data_1, read_data_2
+       );
 input clk;
 input reset;
 input RegWrite;
@@ -18,7 +20,7 @@ assign read_data_1 = (read_addr_1 == 5'b00000)? 32'h00000000: rf_data[read_addr_
 assign read_data_2 = (read_addr_2 == 5'b00000)? 32'h00000000: rf_data[read_addr_2];
 
 integer i;
-always @(posedge reset or posedge clk)
+always @(posedge clk)
   if (reset)
     for (i = 1; i < 32; i = i + 1)
       rf_data[i] <= 32'h00000000;

@@ -1,6 +1,6 @@
-module ALUControl(ALUOp, Funct, ALUCtl, Sign);
+module ALUControl(ALUOp, funct, ALUCtl, Sign);
 input [3:0] ALUOp;
-input [5:0] Funct;
+input [5:0] funct;
 output reg [4:0] ALUCtl;
 output Sign;
 
@@ -17,19 +17,19 @@ parameter ALU_SRA = 5'b11001;
 
 // ALUOp[2:0] == 3'b010 includes the following instructions (R-type and jr, jalr):
 //   add, addu, sub, subu, and, or, xor, nor, sll, srl, sra, slt, sltu, jr, jalr
-// Funct[0] == 1 for addu, subu, or, nor, sra, sltu, jalr.
+// funct[0] == 1 for addu, subu, or, nor, sra, sltu, jalr.
 // If ALUOp[2:0] != 3'b010, we look at ALUOp[3], which equals OpCode[0].
 // We only care about instructions that use the ALU, so they are:
 //   lw, sw, lui, addi, addiu, andi, slti, sltiu, beq
 // ALUOp[3] == 1 for lw, sw, lui, addiu, sltiu.
 // Then we see that ALUOp[3] of the unsigned instructions is 1.
 // Thus, for all unsigned instructions, Sign = 0.
-assign Sign = (ALUOp[2:0] == 3'b010)? ~Funct[0]: ~ALUOp[3];
+assign Sign = (ALUOp[2:0] == 3'b010)? ~funct[0]: ~ALUOp[3];
 
 reg [4:0] aluFunct;
 always @(*)
   // For R-type instructions
-  case (Funct)
+  case (funct)
     6'b00_0000:
       aluFunct = ALU_SLL;
     6'b00_0010:
