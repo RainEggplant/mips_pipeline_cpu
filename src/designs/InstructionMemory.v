@@ -5,41 +5,25 @@ output reg [31:0] instruction;
 always @(*)
   case (address[9:2])
     8'd0:
-      instruction = 32'h20040003;
+      instruction = 32'h3c080001;
     8'd1:
-      instruction = 32'h0c000003;
+      instruction = 32'h3c090000;
     8'd2:
-      instruction = 32'h1000ffff;
+      instruction = 32'h3c0a0000;
     8'd3:
-      instruction = 32'h23bdfff8;
+      instruction = 32'h21090001;
     8'd4:
-      instruction = 32'hafbf0004;
+      instruction = 32'h210a0002;
     8'd5:
-      instruction = 32'hafa40000;
+      instruction = 32'h210b0003;
     8'd6:
-      instruction = 32'h28880001;
+      instruction = 32'h01096020;
     8'd7:
-      instruction = 32'h11000003;
+      instruction = 32'h00000000;
     8'd8:
-      instruction = 32'h00001026;
+      instruction = 32'h00000000;
     8'd9:
-      instruction = 32'h23bd0008;
-    8'd10:
-      instruction = 32'h03e00008;
-    8'd11:
-      instruction = 32'h2084ffff;
-    8'd12:
-      instruction = 32'h0c000003;
-    8'd13:
-      instruction = 32'h8fa40000;
-    8'd14:
-      instruction = 32'h8fbf0004;
-    8'd15:
-      instruction = 32'h23bd0008;
-    8'd16:
-      instruction = 32'h00821020;
-    8'd17:
-      instruction = 32'h03e00008;
+      instruction = 32'h00000000;
     // // addi $a0, $zero, 12345 #(0x3039)
     // 8'd0:    instruction = {6'h08, 5'd0 , 5'd4 , 16'h3039};
     // // addiu $a1, $zero, -11215 #(0xd431)
@@ -66,7 +50,6 @@ always @(*)
     // // Loop:
     // // j Loop
     // 8'd11:   instruction = {6'h02, 26'd11};
-
     default:
       instruction = 32'h00000000;
   endcase

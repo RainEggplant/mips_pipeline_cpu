@@ -62,7 +62,7 @@ wire [31:0] data_bus_rt;
 wire [31:0] data_bus_mem;
 RegisterFile reg_file_1(
                .clk(clk), .reset(reset),
-               .RegWrite(RegWrite), .write_addr(mem_wb.write_addr), .write_data(data_bus_mem),
+               .RegWrite(mem_wb.RegWrite), .write_addr(mem_wb.write_addr), .write_data(data_bus_mem),
                .read_addr_1(if_id.instr[25:21]), .read_addr_2(if_id.instr[20:16]),
                .read_data_1(data_bus_rs), .read_data_2(data_bus_rt)
              );
@@ -106,15 +106,12 @@ wire [31:0] alu_in_2;
 wire [31:0] alu_out;
 wire Zero;
 
-assign alu_in_1 = ALUSrc1 ? {27'h00000, id_ex.shamt} : id_ex.rs;
-assign alu_in_2 = ALUSrc2 ? id_ex.imm : id_ex.rt;
+assign alu_in_1 = id_ex.ALUSrc1 ? {27'h00000, id_ex.shamt} : id_ex.rs;
+assign alu_in_2 = id_ex.ALUSrc2 ? id_ex.imm : id_ex.rt;
 ALU alu1(.in_1(alu_in_1), .in_2(alu_in_2), .ALUCtl(ALUCtl), .Sign(Sign), .out(alu_out), .zero(Zero));
 
-reg [4:0] write_addr;
-always @(posedge clk)
-  begin
-    write_addr <= (id_ex.RegDst == 2'b00) ? id_ex.rt_addr : (RegDst == 2'b01) ? id_ex.rd_addr : 5'b11111;
-  end
+wire [4:0] write_addr;
+assign write_addr = (id_ex.RegDst == 2'b00) ? id_ex.rt_addr : (RegDst == 2'b01) ? id_ex.rd_addr : 5'b11111;
 
 EX_MEM_Reg ex_mem(
              .clk(clk), .wr_en(1), .reset(reset),

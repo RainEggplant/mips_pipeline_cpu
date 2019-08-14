@@ -64,8 +64,8 @@ assign MemtoReg[1:0] =
        2'b00;
 
 assign RegWrite =
-       ~((opcode == 6'h2b || opcode == 6'h04 || opcode == 6'h02)
-         || (opcode == 6'h00 && funct == 6'h08));
+       ~((opcode == 6'h2b || opcode == 6'h04 || opcode == 6'h02) // not branch or jump
+         || (opcode == 6'h00 && funct == 6'h08));  // not jr
 
 assign PCSrc[1:0] =
        (opcode == 6'h02 || opcode == 6'h03)? 2'b01: // j, jal

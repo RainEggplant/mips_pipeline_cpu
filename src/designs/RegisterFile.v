@@ -16,8 +16,14 @@ output [31:0] read_data_2;
 
 reg [31:0] rf_data[31:1];
 
-assign read_data_1 = (read_addr_1 == 5'b00000)? 32'h00000000: rf_data[read_addr_1];
-assign read_data_2 = (read_addr_2 == 5'b00000)? 32'h00000000: rf_data[read_addr_2];
+assign read_data_1 =
+       (read_addr_1 == 5'b00000) ? 32'h00000000 :
+       (RegWrite &&  read_addr_1 == write_addr) ? write_data :
+       rf_data[read_addr_1];
+assign read_data_2 =
+       (read_addr_2 == 5'b00000) ? 32'h00000000 :
+       (RegWrite &&  read_addr_2 == write_addr) ? write_data :
+       rf_data[read_addr_2];
 
 integer i;
 always @(posedge clk)
