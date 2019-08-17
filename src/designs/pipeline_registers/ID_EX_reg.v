@@ -2,7 +2,7 @@
 
 module ID_EX_Reg(
          clk, wr_en, reset,
-         rt_addr_in, rd_addr_in, shamt_in, funct_in, rs_in, rt_in, imm_in, pc_next_in,
+         rs_addr_in, rt_addr_in, rd_addr_in, shamt_in, funct_in, rs_in, rt_in, imm_in, pc_next_in,
          ALUOp_in, ALUSrc1_in, ALUSrc2_in, RegDst_in,
          MemRead_in, MemWrite_in,
          MemtoReg_in, RegWrite_in
@@ -12,6 +12,7 @@ input wr_en;
 input reset;
 
 // ID data
+input [4:0] rs_addr_in;
 input [4:0] rt_addr_in;
 input [4:0] rd_addr_in;
 input [4:0] shamt_in;
@@ -35,7 +36,7 @@ input MemWrite_in;
 input [1:0] MemtoReg_in;
 input RegWrite_in;
 
-
+reg [4:0] rs_addr;
 reg [4:0] rt_addr;
 reg [4:0] rd_addr;
 reg [4:0] shamt;
@@ -59,6 +60,7 @@ always @ (posedge clk)
       begin
         if (wr_en)
           begin
+            rs_addr <= rs_addr_in;
             rt_addr <= rt_addr_in;
             rd_addr <= rd_addr_in;
             shamt <= shamt_in;
@@ -79,6 +81,7 @@ always @ (posedge clk)
       end
     else
       begin
+        rs_addr <= 5'b00000;
         rt_addr <= 5'b00000;
         rd_addr <= 5'b00000;
         shamt <= 5'b00000;

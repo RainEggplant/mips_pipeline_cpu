@@ -119,7 +119,7 @@ set_property -name "webtalk.questa_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.riviera_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.vcs_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.xsim_export_sim" -value "1" -objects $obj
-set_property -name "webtalk.xsim_launch_sim" -value "59" -objects $obj
+set_property -name "webtalk.xsim_launch_sim" -value "64" -objects $obj
 
 # Create 'sources_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sources_1] ""]} {
@@ -134,9 +134,10 @@ set files [list \
  [file normalize "${origin_dir}/src/designs/CPU.v"] \
  [file normalize "${origin_dir}/src/designs/Control.v"] \
  [file normalize "${origin_dir}/src/designs/DataMemory.v"] \
- [file normalize "${origin_dir}/src/designs/pipeline_registers/EX_MEM_reg.v"] \
- [file normalize "${origin_dir}/src/designs/pipeline_registers/ID_EX_reg.v"] \
- [file normalize "${origin_dir}/src/designs/pipeline_registers/IF_ID_reg.v"] \
+ [file normalize "${origin_dir}/src/designs/pipeline_registers/EX_MEM_Reg.v"] \
+ [file normalize "${origin_dir}/src/designs/ForwardControl.v"] \
+ [file normalize "${origin_dir}/src/designs/pipeline_registers/ID_EX_Reg.v"] \
+ [file normalize "${origin_dir}/src/designs/pipeline_registers/IF_ID_Reg.v"] \
  [file normalize "${origin_dir}/src/designs/InstructionMemory.v"] \
  [file normalize "${origin_dir}/src/designs/pipeline_registers/MEM_WB_Reg.v"] \
  [file normalize "${origin_dir}/src/designs/RegisterFile.v"] \

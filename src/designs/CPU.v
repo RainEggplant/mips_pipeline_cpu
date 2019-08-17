@@ -57,14 +57,14 @@ Control control_1(
 
 // Read register A and B
 // WB's writing register also implemented here
-wire [31:0] data_bus_rs;
-wire [31:0] data_bus_rt;
-wire [31:0] data_bus_mem;
+wire [31:0] rs;
+wire [31:0] rt;
+wire [31:0] mem_data;
 RegisterFile reg_file_1(
                .clk(clk), .reset(reset),
-               .RegWrite(mem_wb.RegWrite), .write_addr(mem_wb.write_addr), .write_data(data_bus_mem),
+               .RegWrite(mem_wb.RegWrite), .write_addr(mem_wb.write_addr), .write_data(mem_data),
                .read_addr_1(if_id.instr[25:21]), .read_addr_2(if_id.instr[20:16]),
-               .read_data_1(data_bus_rs), .read_data_2(data_bus_rt)
+               .read_data_1(rs), .read_data_2(rt)
              );
 
 // Handle jump or branch
@@ -73,9 +73,9 @@ assign jump_target = {if_id.pc_next[31:28], if_id.instr[25:0], 2'b00};
 
 wire [31:0] branch_target;
 // TODO: It also needs to flush registers when branch or jump happens
-assign branch_target = (Branch & (data_bus_rs == data_bus_rt)) ? if_id.pc_next + {imm_out[29:0], 2'b00} : pc_plus_4;
+assign branch_target = (Branch & (rs == rt)) ? if_id.pc_next + {imm_out[29:0], 2'b00} : pc_plus_4;
 
-assign pc_next = (PCSrc == 2'b00) ? branch_target : (PCSrc == 2'b01) ? jump_target : data_bus_rs;
+assign pc_next = (PCSrc == 2'b00) ? branch_target : (PCSrc == 2'b01) ? jump_target : rs;
 
 
 // Extend immediate
@@ -88,9 +88,9 @@ assign imm_out = LuOp ? {if_id.instr[15:0], 16'h0000} : ext_out;
 // Store control signals, reg A, B and immediate in IF/ID Register
 ID_EX_Reg id_ex(
             .clk(clk), .wr_en(1), .reset(reset),
-            .rt_addr_in(if_id.instr[20:16]), .rd_addr_in(if_id.instr[15:11]),
+            .rs_addr_in(if_id.instr[25:21]), .rt_addr_in(if_id.instr[20:16]), .rd_addr_in(if_id.instr[15:11]),
             .shamt_in(if_id.instr[10:6]), .funct_in(if_id.instr[5:0]),
-            .rs_in(data_bus_rs), .rt_in(data_bus_rt), .imm_in(imm_out), .pc_next_in(if_id.pc_next),
+            .rs_in(rs), .rt_in(rt), .imm_in(imm_out), .pc_next_in(if_id.pc_next),
             .ALUOp_in(ALUOp), .ALUSrc1_in(ALUSrc1), .ALUSrc2_in(ALUSrc2), .RegDst_in(RegDst),
             .MemRead_in(MemRead),	.MemWrite_in(MemWrite),
             .MemtoReg_in(MemtoReg), .RegWrite_in(RegWrite)
@@ -101,13 +101,33 @@ wire [4:0] ALUCtl;
 wire Sign;
 ALUControl alu_control_1(.ALUOp(id_ex.ALUOp), .funct(id_ex.funct), .ALUCtl(ALUCtl), .Sign(Sign));
 
+wire [1:0] ForwardA;
+wire [1:0] ForwardB;
+ForwardControl forward_ctr(
+                 .reset(reset), .rs_addr(id_ex.rs_addr), .rt_addr(id_ex.rt_addr),
+                 .ex_mem_RegWrite(ex_mem.RegWrite), .ex_mem_write_addr(ex_mem.write_addr),
+                 .mem_wb_RegWrite(mem_wb.RegWrite), .mem_wb_write_addr(mem_wb.write_addr),
+                 .ForwardA(ForwardA), .ForwardB(ForwardB)
+               );
+
+wire [31:0] latest_rs;
+wire [31:0] latest_rt;
 wire [31:0] alu_in_1;
 wire [31:0] alu_in_2;
+assign latest_rs =
+       ForwardA == 2'b00 ? id_ex.rs :
+       ForwardA == 2'b10 ? ex_mem.alu_out :
+       mem_data;
+assign latest_rt =
+       ForwardB == 2'b00 ? id_ex.rt :
+       ForwardB == 2'b10 ? ex_mem.alu_out :
+       mem_data;
+assign alu_in_1 = id_ex.ALUSrc1 ? {27'h00000, id_ex.shamt} : latest_rs;
+assign alu_in_2 = id_ex.ALUSrc2 ? id_ex.imm : latest_rt;
+
 wire [31:0] alu_out;
 wire Zero;
 
-assign alu_in_1 = id_ex.ALUSrc1 ? {27'h00000, id_ex.shamt} : id_ex.rs;
-assign alu_in_2 = id_ex.ALUSrc2 ? id_ex.imm : id_ex.rt;
 ALU alu1(.in_1(alu_in_1), .in_2(alu_in_2), .ALUCtl(ALUCtl), .Sign(Sign), .out(alu_out), .zero(Zero));
 
 wire [4:0] write_addr;
@@ -134,6 +154,6 @@ MEM_WB_Reg mem_wb(
            );
 
 // STAGE 5: WB
-assign data_bus_mem = (mem_wb.MemtoReg == 2'b00) ? mem_wb.alu_out : (mem_wb.MemtoReg == 2'b01) ? mem_wb.mem_out: mem_wb.pc_next;
+assign mem_data = (mem_wb.MemtoReg == 2'b00) ? mem_wb.alu_out : (mem_wb.MemtoReg == 2'b01) ? mem_wb.mem_out: mem_wb.pc_next;
 
 endmodule
