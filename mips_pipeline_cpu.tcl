@@ -119,7 +119,7 @@ set_property -name "webtalk.questa_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.riviera_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.vcs_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.xsim_export_sim" -value "1" -objects $obj
-set_property -name "webtalk.xsim_launch_sim" -value "32" -objects $obj
+set_property -name "webtalk.xsim_launch_sim" -value "59" -objects $obj
 
 # Create 'sources_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sources_1] ""]} {
@@ -134,9 +134,9 @@ set files [list \
  [file normalize "${origin_dir}/src/designs/CPU.v"] \
  [file normalize "${origin_dir}/src/designs/Control.v"] \
  [file normalize "${origin_dir}/src/designs/DataMemory.v"] \
- [file normalize "${origin_dir}/src/designs/pipeline_registers/EX_MEM_Reg.v"] \
- [file normalize "${origin_dir}/src/designs/pipeline_registers/ID_EX_Reg.v"] \
- [file normalize "${origin_dir}/src/designs/pipeline_registers/IF_ID_Reg.v"] \
+ [file normalize "${origin_dir}/src/designs/pipeline_registers/EX_MEM_reg.v"] \
+ [file normalize "${origin_dir}/src/designs/pipeline_registers/ID_EX_reg.v"] \
+ [file normalize "${origin_dir}/src/designs/pipeline_registers/IF_ID_reg.v"] \
  [file normalize "${origin_dir}/src/designs/InstructionMemory.v"] \
  [file normalize "${origin_dir}/src/designs/pipeline_registers/MEM_WB_Reg.v"] \
  [file normalize "${origin_dir}/src/designs/RegisterFile.v"] \
@@ -153,6 +153,7 @@ add_files -norecurse -fileset $obj $files
 # Set 'sources_1' fileset properties
 set obj [get_filesets sources_1]
 set_property -name "top" -value "top" -objects $obj
+set_property -name "top_auto_set" -value "0" -objects $obj
 
 # Create 'constrs_1' fileset (if not found)
 if {[string equal [get_filesets -quiet constrs_1] ""]} {
@@ -162,7 +163,13 @@ if {[string equal [get_filesets -quiet constrs_1] ""]} {
 # Set 'constrs_1' fileset object
 set obj [get_filesets constrs_1]
 
-# Empty (no sources present)
+# Add/Import constrs file and set constrs file properties
+set file "[file normalize "$origin_dir/src/constraints/ego1.xdc"]"
+set file_added [add_files -norecurse -fileset $obj [list $file]]
+set file "$origin_dir/src/constraints/ego1.xdc"
+set file [file normalize $file]
+set file_obj [get_files -of_objects [get_filesets constrs_1] [list "*$file"]]
+set_property -name "file_type" -value "XDC" -objects $file_obj
 
 # Set 'constrs_1' fileset properties
 set obj [get_filesets constrs_1]
@@ -177,6 +184,7 @@ if {[string equal [get_filesets -quiet sim_1] ""]} {
 set obj [get_filesets sim_1]
 set files [list \
  [file normalize "${origin_dir}/src/testbenches/cpu_tb.v"] \
+ [file normalize "${origin_dir}/src/testbenches/test_cpu_behav.wcfg"] \
 ]
 add_files -norecurse -fileset $obj $files
 
@@ -188,7 +196,8 @@ add_files -norecurse -fileset $obj $files
 
 # Set 'sim_1' fileset properties
 set obj [get_filesets sim_1]
-set_property -name "top" -value "top" -objects $obj
+set_property -name "top" -value "test_cpu" -objects $obj
+set_property -name "top_auto_set" -value "0" -objects $obj
 set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
 
 # Create 'register_file_tb' fileset (if not found)
@@ -212,6 +221,30 @@ add_files -norecurse -fileset $obj $files
 # Set 'register_file_tb' fileset properties
 set obj [get_filesets register_file_tb]
 set_property -name "top" -value "RegisterFile_tb" -objects $obj
+set_property -name "top_auto_set" -value "0" -objects $obj
+set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
+
+# Create 'data_memory_tb' fileset (if not found)
+if {[string equal [get_filesets -quiet data_memory_tb] ""]} {
+  create_fileset -simset data_memory_tb
+}
+
+# Set 'data_memory_tb' fileset object
+set obj [get_filesets data_memory_tb]
+set files [list \
+ [file normalize "${origin_dir}/src/testbenches/DataMemory_tb.v"] \
+]
+add_files -norecurse -fileset $obj $files
+
+# Set 'data_memory_tb' fileset file properties for remote files
+# None
+
+# Set 'data_memory_tb' fileset file properties for local files
+# None
+
+# Set 'data_memory_tb' fileset properties
+set obj [get_filesets data_memory_tb]
+set_property -name "top" -value "DataMemory_tb" -objects $obj
 set_property -name "top_auto_set" -value "0" -objects $obj
 set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
 
@@ -243,7 +276,6 @@ set_property -name "display_name" -value "synth_1_synth_report_utilization_0" -o
 
 }
 set obj [get_runs synth_1]
-set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "part" -value "xc7a35tcsg324-1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 

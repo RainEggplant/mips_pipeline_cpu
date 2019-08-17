@@ -111,7 +111,7 @@ assign alu_in_2 = id_ex.ALUSrc2 ? id_ex.imm : id_ex.rt;
 ALU alu1(.in_1(alu_in_1), .in_2(alu_in_2), .ALUCtl(ALUCtl), .Sign(Sign), .out(alu_out), .zero(Zero));
 
 wire [4:0] write_addr;
-assign write_addr = (id_ex.RegDst == 2'b00) ? id_ex.rt_addr : (RegDst == 2'b01) ? id_ex.rd_addr : 5'b11111;
+assign write_addr = (id_ex.RegDst == 2'b00) ? id_ex.rt_addr : (id_ex.RegDst == 2'b01) ? id_ex.rd_addr : 5'b11111;
 
 EX_MEM_Reg ex_mem(
              .clk(clk), .wr_en(1), .reset(reset),
