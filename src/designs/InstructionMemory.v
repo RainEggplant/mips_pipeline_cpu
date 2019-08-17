@@ -49,12 +49,14 @@ always @(*)
     8'd21:
       instruction = 32'h8fbf0004; // lw $ra, 4($sp)
     8'd22:
-      instruction = 32'h23bd0008; // addi $sp, $sp, 8
+      instruction = 32'h23e90001; // addi $t1, $ra, 1
     8'd23:
-      instruction = 32'h00821020; // add $v0, $a0, $v0
+      instruction = 32'h23bd0008; // addi $sp, $sp, 8
     8'd24:
-      instruction = 32'h03e00008; // jr $ra
+      instruction = 32'h00821020; // add $v0, $a0, $v0
     8'd25:
+      instruction = 32'h03e00008; // jr $ra
+    8'd26:
       instruction = 32'h00000000; // nop
     default:
       instruction = 32'h00000000;

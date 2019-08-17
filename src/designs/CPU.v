@@ -11,22 +11,17 @@ input reset;
 input clk;
 
 // STAGE 1: IF
-// PC sub-module
-reg [31:0] pc;
+wire [31:0] pc;
 wire [31:0] pc_next;
-always @(posedge clk)
-  if (reset)
-    pc <= 32'h00000000;
-  else
-    pc <= pc_next;
-
 wire [31:0] pc_plus_4;
+wire Hazard;
+ProgramCounter program_counter(.clk(clk), .reset(reset), .PCWrite(~Hazard), .pc_next(pc_next), .pc(pc));
 assign pc_plus_4 = pc + 32'd4;
 
 // Fetch instruction
 wire [31:0] instruction;
 InstructionMemory instr_mem_1(.address(pc), .instruction(instruction));
-IF_ID_Reg if_id(.clk(clk), .wr_en(1), .reset(reset), .instr_in(instruction), .pc_next_in(pc_plus_4));
+IF_ID_Reg if_id(.clk(clk), .wr_en(~Hazard), .reset(reset), .instr_in(instruction), .pc_next_in(pc_plus_4));
 
 // STAGE 2: ID
 wire ExtOp;
@@ -55,6 +50,11 @@ Control control_1(
           .MemtoReg(MemtoReg), .RegWrite(RegWrite), .PCSrc(PCSrc), .Branch(Branch)
         );
 
+HazardUnit hazard_unit(
+             .if_id_rs_addr(if_id.instr[25:21]), .if_id_rt_addr(if_id.instr[20:16]),
+             .id_ex_MemRead(id_ex.MemRead), .id_ex_rt_addr(id_ex.rt_addr), .Hazard(Hazard)
+           );
+
 // Read register A and B
 // WB's writing register also implemented here
 wire [31:0] rs;
@@ -69,14 +69,12 @@ RegisterFile reg_file_1(
 
 // Handle jump or branch
 wire [31:0] jump_target;
+wire [31:0] branch_target;
 assign jump_target = {if_id.pc_next[31:28], if_id.instr[25:0], 2'b00};
 
-wire [31:0] branch_target;
 // TODO: It also needs to flush registers when branch or jump happens
 assign branch_target = (Branch & (rs == rt)) ? if_id.pc_next + {imm_out[29:0], 2'b00} : pc_plus_4;
-
 assign pc_next = (PCSrc == 2'b00) ? branch_target : (PCSrc == 2'b01) ? jump_target : rs;
-
 
 // Extend immediate
 wire [31:0] ext_out;
@@ -87,7 +85,7 @@ assign imm_out = LuOp ? {if_id.instr[15:0], 16'h0000} : ext_out;
 
 // Store control signals, reg A, B and immediate in IF/ID Register
 ID_EX_Reg id_ex(
-            .clk(clk), .wr_en(1), .reset(reset),
+            .clk(clk), .wr_en(1), .reset(reset), .Hazard(Hazard),
             .rs_addr_in(if_id.instr[25:21]), .rt_addr_in(if_id.instr[20:16]), .rd_addr_in(if_id.instr[15:11]),
             .shamt_in(if_id.instr[10:6]), .funct_in(if_id.instr[5:0]),
             .rs_in(rs), .rt_in(rt), .imm_in(imm_out), .pc_next_in(if_id.pc_next),

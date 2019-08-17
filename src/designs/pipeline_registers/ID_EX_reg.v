@@ -1,7 +1,7 @@
 /* verilator lint_off UNUSED */
 
 module ID_EX_Reg(
-         clk, wr_en, reset,
+         clk, wr_en, reset, Hazard,
          rs_addr_in, rt_addr_in, rd_addr_in, shamt_in, funct_in, rs_in, rt_in, imm_in, pc_next_in,
          ALUOp_in, ALUSrc1_in, ALUSrc2_in, RegDst_in,
          MemRead_in, MemWrite_in,
@@ -10,6 +10,7 @@ module ID_EX_Reg(
 input clk;
 input wr_en;
 input reset;
+input Hazard;
 
 // ID data
 input [4:0] rs_addr_in;
@@ -73,10 +74,10 @@ always @ (posedge clk)
             ALUSrc1 <= ALUSrc1_in;
             ALUSrc2 <= ALUSrc2_in;
             RegDst <= RegDst_in;
-            MemRead <= MemRead_in;
-            MemWrite <= MemWrite_in;
+            MemRead <= Hazard ? 0 : MemRead_in;
+            MemWrite <= Hazard ? 0 : MemWrite_in;
             MemtoReg <= MemtoReg_in;
-            RegWrite <= RegWrite_in;
+            RegWrite <= Hazard ? 0 : RegWrite_in;
           end
       end
     else
