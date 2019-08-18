@@ -1,9 +1,10 @@
 /* verilator lint_off UNUSED */
 
-module IF_ID_Reg(clk, wr_en, reset, instr_in, pc_next_in);
+module IF_ID_Reg(clk, reset, wr_en, Flush, instr_in, pc_next_in);
 input clk;
-input wr_en;
 input reset;
+input wr_en;
+input Flush;
 input [31:0] instr_in;
 input [31:0] pc_next_in;
 
@@ -16,7 +17,7 @@ always @ (posedge clk)
       begin
         if (wr_en)
           begin
-            instr <= instr_in;
+            instr <= Flush ? 32'h00000000 : instr_in;
             pc_next <= pc_next_in;
           end
       end
