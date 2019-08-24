@@ -7,7 +7,7 @@ output reg [31:0] pc;
 
 always @ (posedge clk)
   if (reset)
-    pc <= 32'h00000000;
+    pc <= 32'h80000000;
   else
     if (wr_en)
       pc <= pc_next;

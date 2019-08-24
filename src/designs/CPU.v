@@ -1,13 +1,13 @@
 /*
 TODO:
-  1. Exception and interruption
-  2. More instructions support 
-  3. External devices support
+  1. More instructions support 
+  2. External devices support
 */
 
-module CPU(reset, clk);
-input reset;
+module CPU(clk, reset, IRQ);
 input clk;
+input reset;
+input IRQ;
 
 wire DataHazard;
 wire ControlHazard;
@@ -25,7 +25,7 @@ assign pc_plus_4 = pc + 32'd4;
 
 // Fetch instruction
 wire [31:0] instruction;
-InstructionMemory instr_mem(.address(pc), .instruction(instruction));
+InstructionMemory instr_mem(.address({1'b0, pc[30:0]}), .instruction(instruction));
 IF_ID_Reg if_id(
             .clk(clk), .reset(reset), .wr_en(~DataHazard), .Flush(ControlHazard),
             .instr_in(instruction), .pc_next_in(pc_plus_4)
@@ -33,6 +33,9 @@ IF_ID_Reg if_id(
 
 // STAGE 2: ID
 // Define control signals
+wire ExceptionOrInterrupt;
+wire [2:0] PCSrc;
+wire Branch;
 wire ExtOp;
 wire LuOp;
 wire [1:0] RegDst;
@@ -43,22 +46,26 @@ wire MemRead;
 wire MemWrite;
 wire [1:0] MemtoReg;
 wire RegWrite;
-wire [1:0] PCSrc;
-wire Branch;
 
 // Generate control signals after fetching instructions
 Control control(
+          .Supervised(if_id.pc_next[31]), .IRQ(IRQ), // it is safe to use next PC
           .opcode(if_id.instr[31:26]), .funct(if_id.instr[5:0]),
+          .ExceptionOrInterrupt(ExceptionOrInterrupt),
+          .PCSrc(PCSrc), .Branch(Branch),
           .ExtOp(ExtOp), .LuOp(LuOp),
           .ALUOp(ALUOp), .ALUSrc1(ALUSrc1), .ALUSrc2(ALUSrc2),
           .MemRead(MemRead), .MemWrite(MemWrite), .RegDst(RegDst),
-          .MemtoReg(MemtoReg), .RegWrite(RegWrite), .PCSrc(PCSrc), .Branch(Branch)
+          .MemtoReg(MemtoReg), .RegWrite(RegWrite)
         );
 
 // Determine dest register
 wire [4:0] write_addr;
 assign write_addr =
-       (RegDst == 2'b00) ? if_id.instr[20:16] : (RegDst == 2'b01) ? if_id.instr[15:11] : 5'b11111;
+       ExceptionOrInterrupt ? 5'd26 : // $k0
+       (RegDst == 2'b00) ? if_id.instr[20:16] :
+       (RegDst == 2'b01) ? if_id.instr[15:11] :
+       5'd31; // $ra
 
 // Read register A and B
 // WB's writing register also implemented here
@@ -91,19 +98,24 @@ assign Equal = (latest_rs_id == latest_rt_id);
 
 // Detect hazard
 HazardUnit hazard_unit(
-             .if_id_PCSrc(PCSrc), .if_id_Branch(Branch), .if_id_Equal(Equal),
+             .ExceptionOrInterrupt(ExceptionOrInterrupt), .PCSrc(PCSrc), .Branch(Branch), .Equal(Equal),
              .if_id_rs_addr(if_id.instr[25:21]), .if_id_rt_addr(if_id.instr[20:16]),
              .id_ex_RegWrite(id_ex.RegWrite), .id_ex_MemRead(id_ex.MemRead), .id_ex_write_addr(id_ex.write_addr),
              .ex_mem_MemRead(ex_mem.MemRead), .ex_mem_write_addr(ex_mem.write_addr),
              .DataHazard(DataHazard), .ControlHazard(ControlHazard)
            );
 
-// Handle jump or branch
+// Handle exception, jump or branch
 wire [31:0] jump_target;
 wire [31:0] branch_target;
-assign jump_target = {if_id.pc_next[31:28], if_id.instr[25:0], 2'b00};
 assign branch_target = (Branch & Equal) ? if_id.pc_next + {imm_out[29:0], 2'b00} : pc_plus_4;
-assign pc_next = (PCSrc == 2'b00) ? branch_target : (PCSrc == 2'b01) ? jump_target : rs;
+assign jump_target = {if_id.pc_next[31:28], if_id.instr[25:0], 2'b00};
+assign pc_next =
+       PCSrc == 3'b000 ? branch_target :
+       PCSrc == 3'b001 ? jump_target :
+       PCSrc == 3'b010 ? latest_rs_id :
+       PCSrc == 3'b011 ? 32'h80000004 :
+       32'h80000008;
 
 // Extend immediate
 wire [31:0] ext_out;
@@ -111,7 +123,7 @@ assign ext_out = {ExtOp ? {16{if_id.instr[15]}} : 16'h0000, if_id.instr[15:0]};
 wire [31:0] imm_out;
 assign imm_out = LuOp ? {if_id.instr[15:0], 16'h0000} : ext_out;
 
-// Store control signals, reg A, B and immediate in IF/ID Register
+// Store control signals, reg A, B and immediate in ID/EX Register
 ID_EX_Reg id_ex(
             .clk(clk), .wr_en(1), .reset(reset), .Flush(DataHazard),
             .rs_addr_in(if_id.instr[25:21]), .rt_addr_in(if_id.instr[20:16]), .rd_addr_in(if_id.instr[15:11]),
@@ -177,6 +189,9 @@ MEM_WB_Reg mem_wb(
            );
 
 // STAGE 5: WB
-assign mem_data = (mem_wb.MemtoReg == 2'b00) ? mem_wb.alu_out : (mem_wb.MemtoReg == 2'b01) ? mem_wb.mem_out: mem_wb.pc_next;
+assign mem_data =
+       (mem_wb.MemtoReg == 2'b00) ? mem_wb.alu_out :
+       (mem_wb.MemtoReg == 2'b01) ? mem_wb.mem_out :
+       mem_wb.pc_next;
 
 endmodule

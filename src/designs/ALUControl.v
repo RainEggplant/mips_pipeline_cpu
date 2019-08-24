@@ -69,6 +69,8 @@ always @(*)
     3'b100:
       ALUCtl = ALU_AND;
     3'b101:
+      ALUCtl = ALU_OR;
+    3'b110:
       ALUCtl = ALU_SLT;
     3'b010:
       ALUCtl = aluFunct;

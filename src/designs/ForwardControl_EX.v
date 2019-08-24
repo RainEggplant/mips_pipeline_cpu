@@ -2,7 +2,8 @@ module ForwardControl_EX(
          reset, id_ex_rs_addr, id_ex_rt_addr,
          ex_mem_RegWrite, ex_mem_write_addr,
          mem_wb_RegWrite, mem_wb_write_addr,
-         ForwardA_EX, ForwardB_EX);
+         ForwardA_EX, ForwardB_EX
+       );
 input reset;
 input [4:0] id_ex_rs_addr;
 input [4:0] id_ex_rt_addr;
