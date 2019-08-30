@@ -14,8 +14,6 @@ initial
     IRQ = 0;
     #100 reset = 0;
     #1000 IRQ = 1;
-    #1100 IRQ = 0;
-    #2400 IRQ = 1;
     #2500 IRQ = 0;
     #3900 IRQ = 1;
     #4000 IRQ = 0;

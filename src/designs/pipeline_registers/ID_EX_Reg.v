@@ -4,7 +4,7 @@ module ID_EX_Reg(
          clk, wr_en, reset, Flush,
          rs_addr_in, rt_addr_in, rd_addr_in, shamt_in, funct_in, write_addr_in,
          rs_in, rt_in, imm_in, pc_next_in,
-         ALUOp_in, ALUSrc1_in, ALUSrc2_in, RegDst_in,
+         Branch_in, ALUOp_in, ALUSrc1_in, ALUSrc2_in, RegDst_in,
          MemRead_in, MemWrite_in,
          MemtoReg_in, RegWrite_in
        );
@@ -26,6 +26,7 @@ input [31:0] imm_in;
 input [31:0] pc_next_in;
 
 // EX control
+input Branch_in;
 input [3:0] ALUOp_in;
 input ALUSrc1_in;
 input ALUSrc2_in;
@@ -49,6 +50,7 @@ reg [31:0] rs;
 reg [31:0] rt;
 reg [31:0] imm;
 reg [31:0] pc_next;
+reg Branch;
 reg [3:0] ALUOp;
 reg ALUSrc1;
 reg ALUSrc2;
@@ -74,6 +76,7 @@ always @ (posedge clk)
             rt <= rt_in;
             imm <= imm_in;
             pc_next <= pc_next_in;
+            Branch <= Branch_in;
             ALUOp <= ALUOp_in;
             ALUSrc1 <= ALUSrc1_in;
             ALUSrc2 <= ALUSrc2_in;
@@ -96,6 +99,7 @@ always @ (posedge clk)
         rt <= 32'h00000000;
         imm <= 32'h00000000;
         pc_next <= 32'h00000000;
+        Branch <= 0;
         ALUOp <= 4'b0000;
         ALUSrc1 <= 0;
         ALUSrc2 <= 0;

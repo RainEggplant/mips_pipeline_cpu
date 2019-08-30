@@ -114,12 +114,12 @@ set_property -name "sim.ip.auto_export_scripts" -value "1" -objects $obj
 set_property -name "simulator_language" -value "Mixed" -objects $obj
 set_property -name "webtalk.activehdl_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.ies_export_sim" -value "1" -objects $obj
-set_property -name "webtalk.modelsim_export_sim" -value "1" -objects $obj
+set_property -name "webtalk.modelsim_export_sim" -value "2" -objects $obj
 set_property -name "webtalk.questa_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.riviera_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.vcs_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.xsim_export_sim" -value "1" -objects $obj
-set_property -name "webtalk.xsim_launch_sim" -value "202" -objects $obj
+set_property -name "webtalk.xsim_launch_sim" -value "262" -objects $obj
 
 # Create 'sources_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sources_1] ""]} {
@@ -281,6 +281,7 @@ set_property -name "display_name" -value "synth_1_synth_report_utilization_0" -o
 
 }
 set obj [get_runs synth_1]
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "part" -value "xc7a35tcsg324-1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
@@ -505,6 +506,7 @@ set_property -name "display_name" -value "impl_1_post_route_phys_opt_report_bus_
 
 }
 set obj [get_runs impl_1]
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "part" -value "xc7a35tcsg324-1" -objects $obj
 set_property -name "strategy" -value "Performance_ExtraTimingOpt" -objects $obj
 set_property -name "steps.place_design.args.directive" -value "ExtraTimingOpt" -objects $obj

@@ -2,6 +2,8 @@
 TODO:
   1. More instructions support 
   2. External devices support
+  3. Move ForwardControlEX to ID to see if it optimizes timing
+  4. Add forwarding from MEM to ID to see if it optimizes timing
 */
 
 module CPU(clk, reset, IRQ);
@@ -10,7 +12,8 @@ input reset;
 input IRQ;
 
 wire DataHazard;
-wire ControlHazard;
+wire JumpHazard;
+wire Branch_Hazard;
 
 // STAGE 1: IF
 // Update PC
@@ -27,7 +30,7 @@ assign pc_plus_4 = pc + 32'd4;
 wire [31:0] instruction;
 InstructionMemory instr_mem(.address({1'b0, pc[30:0]}), .instruction(instruction));
 IF_ID_Reg if_id(
-            .clk(clk), .reset(reset), .wr_en(~DataHazard), .Flush(ControlHazard),
+            .clk(clk), .reset(reset), .wr_en(~DataHazard), .Flush(JumpHazard | Branch_Hazard),
             .instr_in(instruction), .pc_next_in(pc_plus_4)
           );
 
@@ -49,7 +52,7 @@ wire RegWrite;
 
 // Generate control signals after fetching instructions
 Control control(
-          .Supervised(if_id.pc_next[31]), .IRQ(IRQ), // it is safe to use next PC
+          .Supervised(pc[31] | if_id.pc_next[31]), .IRQ(IRQ), // it is safe to use pc_next
           .opcode(if_id.instr[31:26]), .funct(if_id.instr[5:0]),
           .ExceptionOrInterrupt(ExceptionOrInterrupt),
           .PCSrc(PCSrc), .Branch(Branch),
@@ -80,35 +83,31 @@ RegisterFile reg_file_1(
              );
 
 // Forward to ID if necessary
-wire ForwardA_ID;
-wire ForwardB_ID;
+wire [1:0] ForwardA_ID;
 wire [31:0] latest_rs_id;
-wire [31:0] latest_rt_id;
 ForwardControl_ID forward_ctr_id(
-                    .reset(reset), .if_id_rs_addr(if_id.instr[25:21]), .if_id_rt_addr(if_id.instr[20:16]),
+                    .reset(reset), .if_id_rs_addr(if_id.instr[25:21]),
                     .ex_mem_RegWrite(ex_mem.RegWrite), .ex_mem_write_addr(ex_mem.write_addr),
-                    .ForwardA_ID(ForwardA_ID), .ForwardB_ID(ForwardB_ID)
+                    .mem_wb_RegWrite(mem_wb.RegWrite), .mem_wb_write_addr(mem_wb.write_addr),
+                    .ForwardA_ID(ForwardA_ID)
                   );
-assign latest_rs_id = ForwardA_ID ? ex_mem.alu_out : rs;
-assign latest_rt_id = ForwardB_ID ? ex_mem.alu_out : rt;
-
-// Compare rs and rt
-wire Equal;
-assign Equal = (latest_rs_id == latest_rt_id);
+assign latest_rs_id =
+       ForwardA_ID == 2'b00 ? rs :
+       ForwardA_ID == 2'b10 ? ex_mem.alu_out :
+       mem_data;
 
 // Detect hazard
 HazardUnit hazard_unit(
-             .ExceptionOrInterrupt(ExceptionOrInterrupt), .PCSrc(PCSrc), .Branch(Branch), .Equal(Equal),
+             .ExceptionOrInterrupt(ExceptionOrInterrupt), .PCSrc(PCSrc),
              .if_id_rs_addr(if_id.instr[25:21]), .if_id_rt_addr(if_id.instr[20:16]),
              .id_ex_RegWrite(id_ex.RegWrite), .id_ex_MemRead(id_ex.MemRead), .id_ex_write_addr(id_ex.write_addr),
              .ex_mem_MemRead(ex_mem.MemRead), .ex_mem_write_addr(ex_mem.write_addr),
-             .DataHazard(DataHazard), .ControlHazard(ControlHazard)
+             .DataHazard(DataHazard), .JumpHazard(JumpHazard)
            );
 
 // Handle exception, jump or branch
 wire [31:0] jump_target;
 wire [31:0] branch_target;
-assign branch_target = (Branch & Equal) ? if_id.pc_next + {imm_out[29:0], 2'b00} : pc_plus_4;
 assign jump_target = {if_id.pc_next[31:28], if_id.instr[25:0], 2'b00};
 assign pc_next =
        PCSrc == 3'b000 ? branch_target :
@@ -125,11 +124,11 @@ assign imm_out = LuOp ? {if_id.instr[15:0], 16'h0000} : ext_out;
 
 // Store control signals, reg A, B and immediate in ID/EX Register
 ID_EX_Reg id_ex(
-            .clk(clk), .wr_en(1), .reset(reset), .Flush(DataHazard),
+            .clk(clk), .wr_en(1), .reset(reset), .Flush(DataHazard | Branch_Hazard),
             .rs_addr_in(if_id.instr[25:21]), .rt_addr_in(if_id.instr[20:16]), .rd_addr_in(if_id.instr[15:11]),
             .shamt_in(if_id.instr[10:6]), .funct_in(if_id.instr[5:0]), .write_addr_in(write_addr),
             .rs_in(rs), .rt_in(rt), .imm_in(imm_out), .pc_next_in(if_id.pc_next),
-            .ALUOp_in(ALUOp), .ALUSrc1_in(ALUSrc1), .ALUSrc2_in(ALUSrc2), .RegDst_in(RegDst),
+            .Branch_in(Branch), .ALUOp_in(ALUOp), .ALUSrc1_in(ALUSrc1), .ALUSrc2_in(ALUSrc2), .RegDst_in(RegDst),
             .MemRead_in(MemRead),	.MemWrite_in(MemWrite),
             .MemtoReg_in(MemtoReg), .RegWrite_in(RegWrite)
           );
@@ -148,25 +147,24 @@ ForwardControl_EX forward_ctr_ex(
                     .ForwardA_EX(ForwardA_EX), .ForwardB_EX(ForwardB_EX)
                   );
 
-wire [31:0] latest_rs;
-wire [31:0] latest_rt;
-wire [31:0] alu_in_1;
-wire [31:0] alu_in_2;
-assign latest_rs =
-       ForwardA_EX == 2'b00 ? id_ex.rs :
-       ForwardA_EX == 2'b10 ? ex_mem.alu_out :
-       mem_data;
-assign latest_rt =
-       ForwardB_EX == 2'b00 ? id_ex.rt :
-       ForwardB_EX == 2'b10 ? ex_mem.alu_out :
-       mem_data;
-assign alu_in_1 = id_ex.ALUSrc1 ? {27'h00000, id_ex.shamt} : latest_rs;
-assign alu_in_2 = id_ex.ALUSrc2 ? id_ex.imm : latest_rt;
+wire [31:0] latest_rs =
+     ForwardA_EX == 2'b00 ? id_ex.rs :
+     ForwardA_EX == 2'b10 ? ex_mem.alu_out :
+     mem_data;
+wire [31:0] latest_rt =
+     ForwardB_EX == 2'b00 ? id_ex.rt :
+     ForwardB_EX == 2'b10 ? ex_mem.alu_out :
+     mem_data;
+wire [31:0] alu_in_1 = id_ex.ALUSrc1 ? {27'h00000, id_ex.shamt} : latest_rs;
+wire [31:0] alu_in_2 = id_ex.ALUSrc2 ? id_ex.imm : latest_rt;
 
 wire [31:0] alu_out;
 wire Zero;
-
 ALU alu1(.in_1(alu_in_1), .in_2(alu_in_2), .ALUCtl(ALUCtl), .Sign(Sign), .out(alu_out), .zero(Zero));
+
+wire Equal = latest_rs == latest_rt;
+assign Branch_Hazard = id_ex.Branch & Equal;
+assign branch_target = Branch_Hazard ? id_ex.pc_next + {id_ex.imm[29:0], 2'b00} : pc_plus_4;
 
 EX_MEM_Reg ex_mem(
              .clk(clk), .wr_en(1), .reset(reset),

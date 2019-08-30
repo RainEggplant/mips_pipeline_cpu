@@ -1,14 +1,12 @@
 module HazardUnit(
-         ExceptionOrInterrupt, PCSrc, Branch, Equal,
+         ExceptionOrInterrupt, PCSrc,
          if_id_rs_addr, if_id_rt_addr,
          id_ex_RegWrite, id_ex_MemRead, id_ex_write_addr,
          ex_mem_MemRead, ex_mem_write_addr,
-         DataHazard, ControlHazard
+         DataHazard, JumpHazard
        );
 input ExceptionOrInterrupt;
 input [2:0] PCSrc;
-input Branch;
-input Equal;
 input [4:0] if_id_rs_addr;
 input [4:0] if_id_rt_addr;
 input id_ex_RegWrite;
@@ -17,21 +15,26 @@ input [4:0] id_ex_write_addr;
 input ex_mem_MemRead;
 input [4:0] ex_mem_write_addr;
 output DataHazard;
-output ControlHazard;
+output JumpHazard;
 
-wire prev =
+wire last =
      id_ex_write_addr != 0 &&
      (if_id_rs_addr == id_ex_write_addr || if_id_rt_addr == id_ex_write_addr);
-wire prev_2nd =
+wire second_last =
      ex_mem_write_addr != 0 &&
      (if_id_rs_addr == ex_mem_write_addr || if_id_rt_addr == ex_mem_write_addr);
-wire lw = id_ex_MemRead && prev;
-assign DataHazard =
-       lw ||
-       ((PCSrc == 3'b010 || Branch) && ((id_ex_RegWrite && prev) || (ex_mem_MemRead && prev_2nd)));
-assign ControlHazard =
-       ExceptionOrInterrupt ||
-       PCSrc == 3'b001 || // j, jal
-       (~DataHazard && (PCSrc == 3'b010 || (Branch && Equal)));
+wire lw = id_ex_MemRead && last;
+wire jr =
+     PCSrc == 3'b010 && // Jump Register instr
+     // the last instr will write to source reg (stall 1 & forward from EX needed)
+     ((id_ex_RegWrite && last) ||
+      // the second last instr will load data to source reg (stall 1 & forward from MEM needed)
+      (ex_mem_MemRead && second_last)
+      // it's safe when the second last instr will write to source reg as the CPU writes to reg before it reads
+      // and if the last instr will load data to source reg, the variable `lw` will handle it
+     );
+
+assign DataHazard = lw || jr;
+assign JumpHazard = ExceptionOrInterrupt || PCSrc == 3'b001 || (~DataHazard && PCSrc == 3'b010);
 
 endmodule
