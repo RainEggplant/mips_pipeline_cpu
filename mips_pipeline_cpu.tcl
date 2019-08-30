@@ -142,10 +142,13 @@ set files [list \
  [file normalize "${origin_dir}/src/designs/cpu/pipeline_registers/ID_EX_Reg.v"] \
  [file normalize "${origin_dir}/src/designs/cpu/pipeline_registers/IF_ID_Reg.v"] \
  [file normalize "${origin_dir}/src/designs/cpu/InstructionMemory.v"] \
+ [file normalize "${origin_dir}/src/designs/external_devices/LED.v"] \
  [file normalize "${origin_dir}/src/designs/cpu/pipeline_registers/MEM_WB_Reg.v"] \
  [file normalize "${origin_dir}/src/designs/cpu/PCOnBreak.v"] \
  [file normalize "${origin_dir}/src/designs/cpu/ProgramCounter.v"] \
  [file normalize "${origin_dir}/src/designs/cpu/RegisterFile.v"] \
+ [file normalize "${origin_dir}/src/designs/external_devices/SSD.v"] \
+ [file normalize "${origin_dir}/src/designs/external_devices/SysTick.v"] \
  [file normalize "${origin_dir}/src/designs/external_devices/Timer.v"] \
  [file normalize "${origin_dir}/src/designs/top.v"] \
 ]

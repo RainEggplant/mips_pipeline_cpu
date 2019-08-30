@@ -1,8 +1,8 @@
-module top(sysclk, reset, led);
+module top(sysclk, reset, led, ssd);
 input sysclk, reset;
-output led;
+output [7:0] led;
+output [11:0] ssd;
 
-CPU cpu1(.clk(sysclk), .reset(reset));
-assign led = cpu1.pc[0];
+CPU cpu1(.clk(sysclk), .reset(reset), .led(led), .ssd(ssd));
 
 endmodule

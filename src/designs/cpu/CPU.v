@@ -6,9 +6,11 @@ TODO:
   4. Add forwarding from MEM to ID to see if it optimizes timing
 */
 
-module CPU(clk, reset);
+module CPU(clk, reset, led, ssd);
 input clk;
 input reset;
+output [7:0] led;
+output [11:0] ssd;
 
 wire IRQ;
 wire ExceptionOrInterrupt;
@@ -186,7 +188,7 @@ EX_MEM_Reg ex_mem(
 wire [31:0] mem_out;
 Bus bus(
       .clk(clk), .reset(reset), .MemRead(ex_mem.MemRead), .MemWrite(ex_mem.MemWrite), .address(ex_mem.alu_out),
-      .write_data(ex_mem.rt), .read_data(mem_out), .IRQ(IRQ)
+      .write_data(ex_mem.rt), .read_data(mem_out), .IRQ(IRQ), .led(led), .ssd(ssd)
     );
 
 MEM_WB_Reg mem_wb(
