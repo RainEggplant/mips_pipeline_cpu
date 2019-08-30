@@ -1,8 +1,8 @@
-module top(sysclk, reset, IRQ, led);
-input sysclk, reset, IRQ;
+module top(sysclk, reset, led);
+input sysclk, reset;
 output led;
 
-CPU cpu1(.clk(sysclk), .reset(reset), .IRQ(IRQ));
+CPU cpu1(.clk(sysclk), .reset(reset));
 assign led = cpu1.pc[0];
 
 endmodule

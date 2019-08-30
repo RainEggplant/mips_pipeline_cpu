@@ -1,7 +1,7 @@
 /* verilator lint_off UNUSED */
 
 module ID_EX_Reg(
-         clk, wr_en, reset, Flush,
+         clk, reset, Flush,
          rs_addr_in, rt_addr_in, rd_addr_in, shamt_in, funct_in, write_addr_in,
          rs_in, rt_in, imm_in, pc_next_in,
          Branch_in, ALUOp_in, ALUSrc1_in, ALUSrc2_in, RegDst_in,
@@ -9,7 +9,6 @@ module ID_EX_Reg(
          MemtoReg_in, RegWrite_in
        );
 input clk;
-input wr_en;
 input reset;
 input Flush;
 
@@ -64,28 +63,25 @@ always @ (posedge clk)
   begin
     if (~reset)
       begin
-        if (wr_en)
-          begin
-            rs_addr <= rs_addr_in;
-            rt_addr <= rt_addr_in;
-            rd_addr <= rd_addr_in;
-            shamt <= shamt_in;
-            funct <= funct_in;
-            write_addr <= write_addr_in;
-            rs <= rs_in;
-            rt <= rt_in;
-            imm <= imm_in;
-            pc_next <= pc_next_in;
-            Branch <= Branch_in;
-            ALUOp <= ALUOp_in;
-            ALUSrc1 <= ALUSrc1_in;
-            ALUSrc2 <= ALUSrc2_in;
-            RegDst <= RegDst_in;
-            MemRead <= Flush ? 0 : MemRead_in;
-            MemWrite <= Flush ? 0 : MemWrite_in;
-            MemtoReg <= MemtoReg_in;
-            RegWrite <= Flush ? 0 : RegWrite_in;
-          end
+        rs_addr <= rs_addr_in;
+        rt_addr <= rt_addr_in;
+        rd_addr <= rd_addr_in;
+        shamt <= shamt_in;
+        funct <= funct_in;
+        write_addr <= write_addr_in;
+        rs <= rs_in;
+        rt <= rt_in;
+        imm <= imm_in;
+        pc_next <= pc_next_in;
+        Branch <= Branch_in;
+        ALUOp <= ALUOp_in;
+        ALUSrc1 <= ALUSrc1_in;
+        ALUSrc2 <= ALUSrc2_in;
+        RegDst <= RegDst_in;
+        MemRead <= Flush ? 0 : MemRead_in;
+        MemWrite <= Flush ? 0 : MemWrite_in;
+        MemtoReg <= MemtoReg_in;
+        RegWrite <= Flush ? 0 : RegWrite_in;
       end
     else
       begin

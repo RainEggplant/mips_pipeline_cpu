@@ -28,8 +28,14 @@ assign read_data_2 =
 integer i;
 always @(posedge clk)
   if (reset)
-    for (i = 1; i < 32; i = i + 1)
-      rf_data[i] <= 32'h00000000;
+    begin
+      for (i = 1; i < 29; i = i + 1)
+        rf_data[i] <= 32'h00000000;
+
+      rf_data[29] <= 32'h00000800;
+      rf_data[30] <= 32'h00000000;
+      rf_data[31] <= 32'h00000000;
+    end
   else if (RegWrite && (write_addr != 5'b00000))
     rf_data[write_addr] <= write_data;
 

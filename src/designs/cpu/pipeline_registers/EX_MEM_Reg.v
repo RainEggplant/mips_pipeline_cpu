@@ -1,13 +1,12 @@
 /* verilator lint_off UNUSED */
 
 module EX_MEM_Reg(
-         clk, wr_en, reset,
+         clk, reset,
          alu_out_in, rt_in, write_addr_in, pc_next_in,
          MemRead_in, MemWrite_in,
          MemtoReg_in, RegWrite_in
        );
 input clk;
-input wr_en;
 input reset;
 
 // EX data
@@ -38,28 +37,25 @@ always @ (posedge clk)
   begin
     if (~reset)
       begin
-        if (wr_en)
-          begin
-            alu_out <= alu_out_in;
-            rt <= rt_in;
-            write_addr <= write_addr_in;
-            pc_next <= pc_next_in;
-            MemRead <= MemRead_in;
-            MemWrite <= MemWrite_in;
-            MemtoReg <= MemtoReg_in;
-            RegWrite <= RegWrite_in;
-          end
-        else
-          begin
-            alu_out <= 32'h00000000;
-            rt <= 32'h00000000;
-            write_addr <= 5'b00000;
-            pc_next <= 32'h00000000;
-            MemRead <= 0;
-            MemWrite <= 0;
-            MemtoReg <= 2'b00;
-            RegWrite <= 0;
-          end
+        alu_out <= alu_out_in;
+        rt <= rt_in;
+        write_addr <= write_addr_in;
+        pc_next <= pc_next_in;
+        MemRead <= MemRead_in;
+        MemWrite <= MemWrite_in;
+        MemtoReg <= MemtoReg_in;
+        RegWrite <= RegWrite_in;
+      end
+    else
+      begin
+        alu_out <= 32'h00000000;
+        rt <= 32'h00000000;
+        write_addr <= 5'b00000;
+        pc_next <= 32'h00000000;
+        MemRead <= 0;
+        MemWrite <= 0;
+        MemtoReg <= 2'b00;
+        RegWrite <= 0;
       end
   end
 endmodule

@@ -11,24 +11,20 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="12188333333fs"></ZoomStartTime>
-      <ZoomEndTime time="13162333334fs"></ZoomEndTime>
-      <Cursor1Time time="13000000000fs"></Cursor1Time>
+      <ZoomStartTime time="24240000000fs"></ZoomStartTime>
+      <ZoomEndTime time="25152000001fs"></ZoomEndTime>
+      <Cursor1Time time="25000000000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="163"></NameColumnWidth>
-      <ValueColumnWidth column_width="115"></ValueColumnWidth>
+      <ValueColumnWidth column_width="105"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="15" />
-   <wvobject fp_name="/test_cpu/reset" type="logic">
-      <obj_property name="ElementShortName">reset</obj_property>
-      <obj_property name="ObjectShortName">reset</obj_property>
-   </wvobject>
+   <WVObjectSize size="14" />
    <wvobject fp_name="/test_cpu/clk" type="logic">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
    </wvobject>
-   <wvobject fp_name="/test_cpu/IRQ" type="logic">
+   <wvobject fp_name="/test_cpu/cpu1/IRQ" type="logic">
       <obj_property name="ElementShortName">IRQ</obj_property>
       <obj_property name="ObjectShortName">IRQ</obj_property>
    </wvobject>
@@ -39,6 +35,26 @@
    <wvobject fp_name="/test_cpu/cpu1/instruction" type="array">
       <obj_property name="ElementShortName">instruction[31:0]</obj_property>
       <obj_property name="ObjectShortName">instruction[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu/cpu1/pc_on_break_0/pc_on_break" type="array">
+      <obj_property name="ElementShortName">pc_on_break[31:0]</obj_property>
+      <obj_property name="ObjectShortName">pc_on_break[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu/cpu1/DataHazard" type="logic">
+      <obj_property name="ElementShortName">DataHazard</obj_property>
+      <obj_property name="ObjectShortName">DataHazard</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu/cpu1/JumpHazard" type="logic">
+      <obj_property name="ElementShortName">JumpHazard</obj_property>
+      <obj_property name="ObjectShortName">JumpHazard</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu/cpu1/BranchHazard" type="logic">
+      <obj_property name="ElementShortName">BranchHazard</obj_property>
+      <obj_property name="ObjectShortName">BranchHazard</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_cpu/cpu1/control/Supervised" type="logic">
+      <obj_property name="ElementShortName">Supervised</obj_property>
+      <obj_property name="ObjectShortName">Supervised</obj_property>
    </wvobject>
    <wvobject fp_name="/test_cpu/cpu1/reg_file_1/rf_data[4]" type="array">
       <obj_property name="DisplayName">label</obj_property>
@@ -67,29 +83,5 @@
    <wvobject fp_name="/test_cpu/cpu1/pc_next" type="array">
       <obj_property name="ElementShortName">pc_next[31:0]</obj_property>
       <obj_property name="ObjectShortName">pc_next[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_cpu/cpu1/reg_file_1/rf_data[9]" type="array">
-      <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="ElementShortName">[9][31:0]</obj_property>
-      <obj_property name="ObjectShortName">[9][31:0]</obj_property>
-      <obj_property name="label">$t1</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_cpu/cpu1/DataHazard" type="logic">
-      <obj_property name="ElementShortName">DataHazard</obj_property>
-      <obj_property name="ObjectShortName">DataHazard</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_cpu/cpu1/JumpHazard" type="logic">
-      <obj_property name="ElementShortName">JumpHazard</obj_property>
-      <obj_property name="ObjectShortName">JumpHazard</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_cpu/cpu1/Branch_Hazard" type="logic">
-      <obj_property name="ElementShortName">Branch_Hazard</obj_property>
-      <obj_property name="ObjectShortName">Branch_Hazard</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_cpu/cpu1/reg_file_1/rf_data[8]" type="array">
-      <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="ElementShortName">[8][31:0]</obj_property>
-      <obj_property name="ObjectShortName">[8][31:0]</obj_property>
-      <obj_property name="label">$t0</obj_property>
    </wvobject>
 </wave_config>

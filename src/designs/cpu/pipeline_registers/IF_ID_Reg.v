@@ -18,8 +18,8 @@ always @ (posedge clk)
         if (wr_en)
           begin
             instr <= Flush ? 32'h00000000 : instr_in;
-            pc_next <= Flush ? pc_next : pc_next_in;
-            // pc_next <= pc_next_in;
+            // pc_next <= Flush ? pc_next : pc_next_in;
+            pc_next <= pc_next_in;
           end
       end
     else

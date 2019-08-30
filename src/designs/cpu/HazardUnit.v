@@ -1,11 +1,9 @@
 module HazardUnit(
-         ExceptionOrInterrupt, PCSrc,
-         if_id_rs_addr, if_id_rt_addr,
+         PCSrc, if_id_rs_addr, if_id_rt_addr,
          id_ex_RegWrite, id_ex_MemRead, id_ex_write_addr,
          ex_mem_MemRead, ex_mem_write_addr,
-         DataHazard, JumpHazard
+         DataHazard
        );
-input ExceptionOrInterrupt;
 input [2:0] PCSrc;
 input [4:0] if_id_rs_addr;
 input [4:0] if_id_rt_addr;
@@ -15,7 +13,6 @@ input [4:0] id_ex_write_addr;
 input ex_mem_MemRead;
 input [4:0] ex_mem_write_addr;
 output DataHazard;
-output JumpHazard;
 
 wire last =
      id_ex_write_addr != 0 &&
@@ -35,6 +32,5 @@ wire jr =
      );
 
 assign DataHazard = lw || jr;
-assign JumpHazard = ExceptionOrInterrupt || PCSrc == 3'b001 || (~DataHazard && PCSrc == 3'b010);
 
 endmodule

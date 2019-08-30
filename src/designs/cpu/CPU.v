@@ -6,14 +6,15 @@ TODO:
   4. Add forwarding from MEM to ID to see if it optimizes timing
 */
 
-module CPU(clk, reset, IRQ);
+module CPU(clk, reset);
 input clk;
 input reset;
-input IRQ;
 
+wire IRQ;
+wire ExceptionOrInterrupt;
 wire DataHazard;
 wire JumpHazard;
-wire Branch_Hazard;
+wire BranchHazard;
 
 // STAGE 1: IF
 // Update PC
@@ -21,7 +22,7 @@ wire [31:0] pc;
 wire [31:0] pc_next;
 wire [31:0] pc_plus_4;
 ProgramCounter program_counter(
-                 .clk(clk), .reset(reset), .wr_en(~DataHazard),
+                 .clk(clk), .reset(reset), .wr_en(~DataHazard || ExceptionOrInterrupt),
                  .pc_next(pc_next), .pc(pc)
                );
 assign pc_plus_4 = pc + 32'd4;
@@ -30,13 +31,13 @@ assign pc_plus_4 = pc + 32'd4;
 wire [31:0] instruction;
 InstructionMemory instr_mem(.address({1'b0, pc[30:0]}), .instruction(instruction));
 IF_ID_Reg if_id(
-            .clk(clk), .reset(reset), .wr_en(~DataHazard), .Flush(JumpHazard | Branch_Hazard),
+            .clk(clk), .reset(reset), .wr_en(~DataHazard || ExceptionOrInterrupt),
+            .Flush(ExceptionOrInterrupt || JumpHazard || BranchHazard),
             .instr_in(instruction), .pc_next_in(pc_plus_4)
           );
 
 // STAGE 2: ID
 // Define control signals
-wire ExceptionOrInterrupt;
 wire [2:0] PCSrc;
 wire Branch;
 wire ExtOp;
@@ -52,7 +53,7 @@ wire RegWrite;
 
 // Generate control signals after fetching instructions
 Control control(
-          .Supervised(pc[31] | if_id.pc_next[31]), .IRQ(IRQ), // it is safe to use pc_next
+          .Supervised(pc[31] || if_id.pc_next[31]), .IRQ(IRQ), // it is safe to use pc_next
           .opcode(if_id.instr[31:26]), .funct(if_id.instr[5:0]),
           .ExceptionOrInterrupt(ExceptionOrInterrupt),
           .PCSrc(PCSrc), .Branch(Branch),
@@ -61,6 +62,15 @@ Control control(
           .MemRead(MemRead), .MemWrite(MemWrite), .RegDst(RegDst),
           .MemtoReg(MemtoReg), .RegWrite(RegWrite)
         );
+
+assign JumpHazard = PCSrc == 3'b001 || PCSrc == 3'b010;
+
+wire [31:0] pc_on_break;
+PCOnBreak pc_on_break_0(
+            .clk(clk), .reset(reset),
+            .wr_en(~(DataHazard || JumpHazard || BranchHazard || Branch)),
+            .pc_in(pc), .pc_on_break(pc_on_break)
+          );
 
 // Determine dest register
 wire [4:0] write_addr;
@@ -98,11 +108,10 @@ assign latest_rs_id =
 
 // Detect hazard
 HazardUnit hazard_unit(
-             .ExceptionOrInterrupt(ExceptionOrInterrupt), .PCSrc(PCSrc),
-             .if_id_rs_addr(if_id.instr[25:21]), .if_id_rt_addr(if_id.instr[20:16]),
+             .PCSrc(PCSrc), .if_id_rs_addr(if_id.instr[25:21]), .if_id_rt_addr(if_id.instr[20:16]),
              .id_ex_RegWrite(id_ex.RegWrite), .id_ex_MemRead(id_ex.MemRead), .id_ex_write_addr(id_ex.write_addr),
              .ex_mem_MemRead(ex_mem.MemRead), .ex_mem_write_addr(ex_mem.write_addr),
-             .DataHazard(DataHazard), .JumpHazard(JumpHazard)
+             .DataHazard(DataHazard)
            );
 
 // Handle exception, jump or branch
@@ -124,10 +133,10 @@ assign imm_out = LuOp ? {if_id.instr[15:0], 16'h0000} : ext_out;
 
 // Store control signals, reg A, B and immediate in ID/EX Register
 ID_EX_Reg id_ex(
-            .clk(clk), .wr_en(1), .reset(reset), .Flush(DataHazard | Branch_Hazard),
+            .clk(clk), .reset(reset), .Flush(DataHazard || BranchHazard),
             .rs_addr_in(if_id.instr[25:21]), .rt_addr_in(if_id.instr[20:16]), .rd_addr_in(if_id.instr[15:11]),
             .shamt_in(if_id.instr[10:6]), .funct_in(if_id.instr[5:0]), .write_addr_in(write_addr),
-            .rs_in(rs), .rt_in(rt), .imm_in(imm_out), .pc_next_in(if_id.pc_next),
+            .rs_in(rs), .rt_in(rt), .imm_in(imm_out), .pc_next_in(ExceptionOrInterrupt ? pc_on_break : if_id.pc_next),
             .Branch_in(Branch), .ALUOp_in(ALUOp), .ALUSrc1_in(ALUSrc1), .ALUSrc2_in(ALUSrc2), .RegDst_in(RegDst),
             .MemRead_in(MemRead),	.MemWrite_in(MemWrite),
             .MemtoReg_in(MemtoReg), .RegWrite_in(RegWrite)
@@ -163,11 +172,11 @@ wire Zero;
 ALU alu1(.in_1(alu_in_1), .in_2(alu_in_2), .ALUCtl(ALUCtl), .Sign(Sign), .out(alu_out), .zero(Zero));
 
 wire Equal = latest_rs == latest_rt;
-assign Branch_Hazard = id_ex.Branch & Equal;
-assign branch_target = Branch_Hazard ? id_ex.pc_next + {id_ex.imm[29:0], 2'b00} : pc_plus_4;
+assign BranchHazard = id_ex.Branch & Equal;
+assign branch_target = BranchHazard ? id_ex.pc_next + {id_ex.imm[29:0], 2'b00} : pc_plus_4;
 
 EX_MEM_Reg ex_mem(
-             .clk(clk), .wr_en(1), .reset(reset),
+             .clk(clk), .reset(reset),
              .alu_out_in(alu_out), .rt_in(latest_rt), .write_addr_in(id_ex.write_addr), .pc_next_in(id_ex.pc_next),
              .MemRead_in(id_ex.MemRead), .MemWrite_in(id_ex.MemWrite),
              .MemtoReg_in(id_ex.MemtoReg), .RegWrite_in(id_ex.RegWrite)
@@ -175,13 +184,13 @@ EX_MEM_Reg ex_mem(
 
 // STAGE 4: MEM
 wire [31:0] mem_out;
-DataMemory data_mem_1(
-             .clk(clk), .MemRead(ex_mem.MemRead), .MemWrite(ex_mem.MemWrite), .address(ex_mem.alu_out),
-             .write_data(ex_mem.rt), .read_data(mem_out)
-           );
+Bus bus(
+      .clk(clk), .reset(reset), .MemRead(ex_mem.MemRead), .MemWrite(ex_mem.MemWrite), .address(ex_mem.alu_out),
+      .write_data(ex_mem.rt), .read_data(mem_out), .IRQ(IRQ)
+    );
 
 MEM_WB_Reg mem_wb(
-             .clk(clk), .wr_en(1), .reset(reset),
+             .clk(clk), .reset(reset),
              .alu_out_in(ex_mem.alu_out), .write_addr_in(ex_mem.write_addr), .mem_out_in(mem_out), .pc_next_in(ex_mem.pc_next),
              .MemtoReg_in(ex_mem.MemtoReg), .RegWrite_in(ex_mem.RegWrite)
            );

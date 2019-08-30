@@ -1,12 +1,11 @@
 /* verilator lint_off UNUSED */
 
 module MEM_WB_Reg(
-         clk, wr_en, reset,
+         clk, reset,
          alu_out_in, write_addr_in, mem_out_in, pc_next_in,
          MemtoReg_in, RegWrite_in
        );
 input clk;
-input wr_en;
 input reset;
 
 // Mem data
@@ -31,15 +30,12 @@ always @ (posedge clk)
   begin
     if (~reset)
       begin
-        if (wr_en)
-          begin
-            alu_out <= alu_out_in;
-            write_addr <= write_addr_in;
-            mem_out <= mem_out_in;
-            pc_next <= pc_next_in;
-            MemtoReg <= MemtoReg_in;
-            RegWrite <= RegWrite_in;
-          end
+        alu_out <= alu_out_in;
+        write_addr <= write_addr_in;
+        mem_out <= mem_out_in;
+        pc_next <= pc_next_in;
+        MemtoReg <= MemtoReg_in;
+        RegWrite <= RegWrite_in;
       end
     else
       begin
