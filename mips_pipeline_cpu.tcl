@@ -129,21 +129,21 @@ if {[string equal [get_filesets -quiet sources_1] ""]} {
 # Set 'sources_1' fileset object
 set obj [get_filesets sources_1]
 set files [list \
- [file normalize "${origin_dir}/src/designs/ALU.v"] \
- [file normalize "${origin_dir}/src/designs/ALUControl.v"] \
- [file normalize "${origin_dir}/src/designs/CPU.v"] \
- [file normalize "${origin_dir}/src/designs/Control.v"] \
- [file normalize "${origin_dir}/src/designs/DataMemory.v"] \
- [file normalize "${origin_dir}/src/designs/pipeline_registers/EX_MEM_Reg.v"] \
- [file normalize "${origin_dir}/src/designs/ForwardControl_EX.v"] \
- [file normalize "${origin_dir}/src/designs/ForwardControl_ID.v"] \
- [file normalize "${origin_dir}/src/designs/HazardUnit.v"] \
- [file normalize "${origin_dir}/src/designs/pipeline_registers/ID_EX_Reg.v"] \
- [file normalize "${origin_dir}/src/designs/pipeline_registers/IF_ID_Reg.v"] \
- [file normalize "${origin_dir}/src/designs/InstructionMemory.v"] \
- [file normalize "${origin_dir}/src/designs/pipeline_registers/MEM_WB_Reg.v"] \
- [file normalize "${origin_dir}/src/designs/ProgramCounter.v"] \
- [file normalize "${origin_dir}/src/designs/RegisterFile.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/ALU.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/ALUControl.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/CPU.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/Control.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/DataMemory.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/pipeline_registers/EX_MEM_Reg.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/ForwardControl_EX.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/ForwardControl_ID.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/HazardUnit.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/pipeline_registers/ID_EX_Reg.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/pipeline_registers/IF_ID_Reg.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/InstructionMemory.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/pipeline_registers/MEM_WB_Reg.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/ProgramCounter.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/RegisterFile.v"] \
  [file normalize "${origin_dir}/src/designs/top.v"] \
 ]
 add_files -norecurse -fileset $obj $files
