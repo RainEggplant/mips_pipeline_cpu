@@ -129,7 +129,8 @@ wire [31:0] jump_target;
 wire [31:0] branch_target;
 assign jump_target = {if_id.pc_next[31:28], if_id.instr[25:0], 2'b00};
 assign pc_next =
-       PCSrc == 3'b000 ? branch_target :
+       BranchHazard ? branch_target :
+       PCSrc == 3'b000 ? pc_plus_4 :
        PCSrc == 3'b001 ? jump_target :
        PCSrc == 3'b010 ? latest_rs_id :
        PCSrc == 3'b011 ? 32'h80000004 :
@@ -183,7 +184,7 @@ ALU alu1(.in_1(alu_in_1), .in_2(alu_in_2), .ALUCtl(ALUCtl), .Sign(Sign), .out(al
 
 wire Equal = latest_rs == latest_rt;
 assign BranchHazard = id_ex.Branch & Equal;
-assign branch_target = BranchHazard ? id_ex.pc_next + {id_ex.imm[29:0], 2'b00} : pc_plus_4;
+assign branch_target =  id_ex.pc_next + {id_ex.imm[29:0], 2'b00};
 
 EX_MEM_Reg ex_mem(
              .clk(clk), .reset(reset),
