@@ -4,7 +4,7 @@ module Control(
          PCSrc, Branch, ExtOp, LuOp,
          ALUOp, ALUSrc1, ALUSrc2, RegDst,
          MemRead, MemWrite,
-         MemtoReg, RegWrite
+         MemToReg, RegWrite
        );
 input Supervised;
 input IRQ;
@@ -29,7 +29,7 @@ output MemRead;
 output MemWrite;
 
 // WB control
-output [1:0] MemtoReg;
+output [1:0] MemToReg;
 output RegWrite;
 
 wire Unsupported;
@@ -95,7 +95,7 @@ assign MemRead = (opcode == 6'h23) & ~ExceptionOrInterrupt;
 
 assign MemWrite = (opcode == 6'h2b) & ~ExceptionOrInterrupt;
 
-assign MemtoReg[1:0] =
+assign MemToReg[1:0] =
        (ExceptionOrInterrupt || (opcode == 6'h03 || (opcode == 6'h00 && funct == 6'h09))) ? 2'b10 :  // next PC
        (opcode == 6'h23) ? 2'b01: // MEM out
        2'b00; // ALU out

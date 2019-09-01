@@ -1,8 +1,6 @@
 /*
 TODO:
   1. More instructions support 
-  2. Move ForwardControlEX to ID to see if it optimizes timing
-  3. Add forwarding from MEM to ID to see if it optimizes timing
 */
 
 module CPU(
@@ -58,7 +56,7 @@ wire ALUSrc1;
 wire ALUSrc2;
 wire MemRead;
 wire MemWrite;
-wire [1:0] MemtoReg;
+wire [1:0] MemToReg;
 wire RegWrite;
 
 // Generate control signals after fetching instructions
@@ -70,16 +68,16 @@ Control control(
           .ExtOp(ExtOp), .LuOp(LuOp),
           .ALUOp(ALUOp), .ALUSrc1(ALUSrc1), .ALUSrc2(ALUSrc2),
           .MemRead(MemRead), .MemWrite(MemWrite), .RegDst(RegDst),
-          .MemtoReg(MemtoReg), .RegWrite(RegWrite)
+          .MemToReg(MemToReg), .RegWrite(RegWrite)
         );
 
 assign JumpHazard = PCSrc == 3'b001 || PCSrc == 3'b010;
 
-wire [31:0] pc_on_brk;
-PCOnBreak pc_on_break(
+wire [31:0] pc_on_break;
+PCOnBreak pc_on_brk(
             .clk(clk), .reset(reset),
             .wr_en(~(DataHazard || JumpHazard || BranchHazard || Branch)),
-            .pc_in(pc), .pc_on_break(pc_on_brk)
+            .pc_in(pc), .pc_on_break(pc_on_break)
           );
 
 // Determine dest register
@@ -94,27 +92,33 @@ assign write_addr =
 // WB's writing register also implemented here
 wire [31:0] rs;
 wire [31:0] rt;
-wire [31:0] mem_data;
 RegisterFile reg_file(
                .clk(clk), .reset(reset),
-               .RegWrite(mem_wb.RegWrite), .write_addr(mem_wb.write_addr), .write_data(mem_data),
+               .RegWrite(mem_wb.RegWrite), .write_addr(mem_wb.write_addr), .write_data(mem_wb.mem_data),
                .read_addr_1(if_id.instr[25:21]), .read_addr_2(if_id.instr[20:16]),
                .read_data_1(rs), .read_data_2(rt)
              );
 
 // Forward to ID if necessary
 wire [1:0] ForwardA_ID;
-wire [31:0] latest_rs_id;
-ForwardControl_ID forward_ctr_id(
-                    .reset(reset), .if_id_rs_addr(if_id.instr[25:21]),
-                    .ex_mem_RegWrite(ex_mem.RegWrite), .ex_mem_write_addr(ex_mem.write_addr),
-                    .mem_wb_RegWrite(mem_wb.RegWrite), .mem_wb_write_addr(mem_wb.write_addr),
-                    .ForwardA_ID(ForwardA_ID)
-                  );
-assign latest_rs_id =
-       ForwardA_ID == 2'b00 ? rs :
-       ForwardA_ID == 2'b10 ? ex_mem.alu_out :
-       mem_data;
+wire ForwardB_ID;
+wire [1:0] ForwardA_EX;
+wire [1:0] ForwardB_EX;
+ForwardControl forward_ctr(
+                 .reset(reset), .rs_addr(if_id.instr[25:21]), .rt_addr(if_id.instr[20:16]),
+                 .id_ex_RegWrite(id_ex.RegWrite), .id_ex_write_addr(id_ex.write_addr),
+                 .ex_mem_RegWrite(ex_mem.RegWrite), .ex_mem_write_addr(ex_mem.write_addr),
+                 .mem_wb_RegWrite(mem_wb.RegWrite), .mem_wb_write_addr(mem_wb.write_addr),
+                 .ForwardA_ID(ForwardA_ID), .ForwardB_ID(ForwardB_ID),
+                 .ForwardA_EX(ForwardA_EX), .ForwardB_EX(ForwardB_EX)
+               );
+
+wire [31:0] latest_rs_id =
+     ForwardA_ID == 2'b00 ? rs :
+     ForwardA_ID == 2'b10 ? ex_mem.alu_out :
+     mem_wb.mem_data;
+
+wire [31:0] latest_rt_id = ForwardB_ID ? mem_wb.mem_data : rt;
 
 // Detect hazard
 HazardUnit hazard_unit(
@@ -145,12 +149,13 @@ assign imm_out = LuOp ? {if_id.instr[15:0], 16'h0000} : ext_out;
 // Store control signals, reg A, B and immediate in ID/EX Register
 ID_EX_Reg id_ex(
             .clk(clk), .reset(reset), .Flush(DataHazard || BranchHazard),
-            .rs_addr_in(if_id.instr[25:21]), .rt_addr_in(if_id.instr[20:16]), .rd_addr_in(if_id.instr[15:11]),
             .shamt_in(if_id.instr[10:6]), .funct_in(if_id.instr[5:0]), .write_addr_in(write_addr),
-            .rs_in(rs), .rt_in(rt), .imm_in(imm_out), .pc_next_in(ExceptionOrInterrupt ? pc_on_brk : if_id.pc_next),
+            .rs_in(latest_rs_id), .rt_in(latest_rt_id), .imm_in(imm_out),
+            .pc_next_in(ExceptionOrInterrupt ? pc_on_break : if_id.pc_next),
             .Branch_in(Branch), .ALUOp_in(ALUOp), .ALUSrc1_in(ALUSrc1), .ALUSrc2_in(ALUSrc2), .RegDst_in(RegDst),
+            .ForwardA_EX_in(ForwardA_EX), .ForwardB_EX_in(ForwardB_EX),
             .MemRead_in(MemRead),	.MemWrite_in(MemWrite),
-            .MemtoReg_in(MemtoReg), .RegWrite_in(RegWrite)
+            .MemToReg_in(MemToReg), .RegWrite_in(RegWrite)
           );
 
 // STAGE 3: EX
@@ -158,23 +163,14 @@ wire [4:0] ALUCtl;
 wire Sign;
 ALUControl alu_control(.ALUOp(id_ex.ALUOp), .funct(id_ex.funct), .ALUCtl(ALUCtl), .Sign(Sign));
 
-wire [1:0] ForwardA_EX;
-wire [1:0] ForwardB_EX;
-ForwardControl_EX forward_ctr_ex(
-                    .reset(reset), .id_ex_rs_addr(id_ex.rs_addr), .id_ex_rt_addr(id_ex.rt_addr),
-                    .ex_mem_RegWrite(ex_mem.RegWrite), .ex_mem_write_addr(ex_mem.write_addr),
-                    .mem_wb_RegWrite(mem_wb.RegWrite), .mem_wb_write_addr(mem_wb.write_addr),
-                    .ForwardA_EX(ForwardA_EX), .ForwardB_EX(ForwardB_EX)
-                  );
-
 wire [31:0] latest_rs =
-     ForwardA_EX == 2'b00 ? id_ex.rs :
-     ForwardA_EX == 2'b10 ? ex_mem.alu_out :
-     mem_data;
+     id_ex.ForwardA_EX == 2'b00 ? id_ex.rs :
+     id_ex.ForwardA_EX == 2'b10 ? ex_mem.alu_out :
+     mem_wb.mem_data;
 wire [31:0] latest_rt =
-     ForwardB_EX == 2'b00 ? id_ex.rt :
-     ForwardB_EX == 2'b10 ? ex_mem.alu_out :
-     mem_data;
+     id_ex.ForwardB_EX == 2'b00 ? id_ex.rt :
+     id_ex.ForwardB_EX == 2'b10 ? ex_mem.alu_out :
+     mem_wb.mem_data;
 wire [31:0] alu_in_1 = id_ex.ALUSrc1 ? {27'h00000, id_ex.shamt} : latest_rs;
 wire [31:0] alu_in_2 = id_ex.ALUSrc2 ? id_ex.imm : latest_rt;
 
@@ -190,7 +186,7 @@ EX_MEM_Reg ex_mem(
              .clk(clk), .reset(reset),
              .alu_out_in(alu_out), .rt_in(latest_rt), .write_addr_in(id_ex.write_addr), .pc_next_in(id_ex.pc_next),
              .MemRead_in(id_ex.MemRead), .MemWrite_in(id_ex.MemWrite),
-             .MemtoReg_in(id_ex.MemtoReg), .RegWrite_in(id_ex.RegWrite)
+             .MemToReg_in(id_ex.MemToReg), .RegWrite_in(id_ex.RegWrite)
            );
 
 // STAGE 4: MEM
@@ -204,16 +200,18 @@ Bus bus(
       .IRQ(IRQ), .led(led), .ssd(ssd), .Tx_Serial(Tx_Serial)
     );
 
+wire [31:0] mem_data =
+     (ex_mem.MemToReg == 2'b00) ? ex_mem.alu_out :
+     (ex_mem.MemToReg == 2'b01) ? mem_out :
+     ex_mem.pc_next;
+
 MEM_WB_Reg mem_wb(
              .clk(clk), .reset(reset),
-             .alu_out_in(ex_mem.alu_out), .write_addr_in(ex_mem.write_addr), .mem_out_in(mem_out), .pc_next_in(ex_mem.pc_next),
-             .MemtoReg_in(ex_mem.MemtoReg), .RegWrite_in(ex_mem.RegWrite)
+             .write_addr_in(ex_mem.write_addr), .mem_data_in(mem_data),
+             .MemToReg_in(ex_mem.MemToReg), .RegWrite_in(ex_mem.RegWrite)
            );
 
 // STAGE 5: WB
-assign mem_data =
-       (mem_wb.MemtoReg == 2'b00) ? mem_wb.alu_out :
-       (mem_wb.MemtoReg == 2'b01) ? mem_wb.mem_out :
-       mem_wb.pc_next;
+// This only contains a memory write operation, thus the codes are specified in ID stage.
 
 endmodule

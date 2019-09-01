@@ -4,7 +4,7 @@ module EX_MEM_Reg(
          clk, reset,
          alu_out_in, rt_in, write_addr_in, pc_next_in,
          MemRead_in, MemWrite_in,
-         MemtoReg_in, RegWrite_in
+         MemToReg_in, RegWrite_in
        );
 input clk;
 input reset;
@@ -20,7 +20,7 @@ input MemRead_in;
 input MemWrite_in;
 
 // WB control
-input [1:0] MemtoReg_in;
+input [1:0] MemToReg_in;
 input RegWrite_in;
 
 
@@ -30,7 +30,7 @@ reg [4:0] write_addr;
 reg [31:0] pc_next;
 reg MemRead;
 reg MemWrite;
-reg [1:0] MemtoReg;
+reg [1:0] MemToReg;
 reg RegWrite;
 
 always @ (posedge clk)
@@ -43,7 +43,7 @@ always @ (posedge clk)
         pc_next <= pc_next_in;
         MemRead <= MemRead_in;
         MemWrite <= MemWrite_in;
-        MemtoReg <= MemtoReg_in;
+        MemToReg <= MemToReg_in;
         RegWrite <= RegWrite_in;
       end
     else
@@ -54,7 +54,7 @@ always @ (posedge clk)
         pc_next <= 32'h00000000;
         MemRead <= 0;
         MemWrite <= 0;
-        MemtoReg <= 2'b00;
+        MemToReg <= 2'b00;
         RegWrite <= 0;
       end
   end

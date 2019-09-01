@@ -120,7 +120,7 @@ set_property -name "webtalk.questa_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.riviera_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.vcs_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.xsim_export_sim" -value "1" -objects $obj
-set_property -name "webtalk.xsim_launch_sim" -value "345" -objects $obj
+set_property -name "webtalk.xsim_launch_sim" -value "350" -objects $obj
 
 # Create 'sources_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sources_1] ""]} {
@@ -137,8 +137,6 @@ set files [list \
  [file normalize "${origin_dir}/src/designs/cpu/Control.v"] \
  [file normalize "${origin_dir}/src/designs/cpu/DataMemory.v"] \
  [file normalize "${origin_dir}/src/designs/cpu/pipeline_registers/EX_MEM_Reg.v"] \
- [file normalize "${origin_dir}/src/designs/cpu/ForwardControl_EX.v"] \
- [file normalize "${origin_dir}/src/designs/cpu/ForwardControl_ID.v"] \
  [file normalize "${origin_dir}/src/designs/cpu/HazardUnit.v"] \
  [file normalize "${origin_dir}/src/designs/cpu/pipeline_registers/ID_EX_Reg.v"] \
  [file normalize "${origin_dir}/src/designs/cpu/pipeline_registers/IF_ID_Reg.v"] \
@@ -155,6 +153,7 @@ set files [list \
  [file normalize "${origin_dir}/src/designs/external_devices/UART_Rx.v"] \
  [file normalize "${origin_dir}/src/designs/external_devices/UART_Tx.v"] \
  [file normalize "${origin_dir}/src/designs/top.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/ForwardControl.v"] \
 ]
 add_files -norecurse -fileset $obj $files
 
@@ -339,6 +338,7 @@ set_property -name "display_name" -value "synth_1_synth_report_utilization_0" -o
 
 }
 set obj [get_runs synth_1]
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "part" -value "xc7a35tcsg324-1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
@@ -563,6 +563,7 @@ set_property -name "display_name" -value "impl_1_post_route_phys_opt_report_bus_
 
 }
 set obj [get_runs impl_1]
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "part" -value "xc7a35tcsg324-1" -objects $obj
 set_property -name "strategy" -value "Performance_ExtraTimingOpt" -objects $obj
 set_property -name "steps.place_design.args.directive" -value "ExtraTimingOpt" -objects $obj
