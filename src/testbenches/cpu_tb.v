@@ -1,19 +1,29 @@
 `timescale 1ns / 1ns
-module test_cpu();
+module CPU_tb();
 
 reg reset;
 reg clk;
-reg IRQ;
+reg uart_on;
 
-CPU cpu1(.clk(clk), .reset(reset));
+CPU cpu_0(
+      .clk(clk), .reset(reset), .uart_on(uart_on),
+      .led(led), .ssd(ssd)
+    );
 
 initial
-  fork
-    reset = 1;
+  begin
+    $display("Loading instructions into instr_mem ...");
+    $readmemh("test_code_0.hex", cpu_0.bus.instr_mem_0.ram_data);
+    $display("Instructions loaded!");
+    $display("Loading data into data_mem ...");
+    $readmemh("test_data_0.hex", cpu_0.bus.data_mem_0.ram_data);
+    $display("Data loaded!");
     clk = 1;
-    #100 reset = 0;
-  join
+    uart_on = 0;
+    reset = 1;
+    #10 reset = 0;
+  end
 
-always #50 clk = ~clk;
+always #5 clk = ~clk;
 
 endmodule

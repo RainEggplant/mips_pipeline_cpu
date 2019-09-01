@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="CPU_with_UART_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="CPU_with_UART_tb" />
+            <top_module name="glbl" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="47959973333333fs"></ZoomStartTime>
+      <ZoomEndTime time="51159973333334fs"></ZoomEndTime>
+      <Cursor1Time time="48324973333000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="163"></NameColumnWidth>
+      <ValueColumnWidth column_width="95"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="10" />
+   <wvobject fp_name="/CPU_with_UART_tb/reset" type="logic">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_with_UART_tb/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_with_UART_tb/uart_on" type="logic">
+      <obj_property name="ElementShortName">uart_on</obj_property>
+      <obj_property name="ObjectShortName">uart_on</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_with_UART_tb/uart_mode" type="logic">
+      <obj_property name="ElementShortName">uart_mode</obj_property>
+      <obj_property name="ObjectShortName">uart_mode</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_with_UART_tb/uart_ram_id" type="logic">
+      <obj_property name="ElementShortName">uart_ram_id</obj_property>
+      <obj_property name="ObjectShortName">uart_ram_id</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_with_UART_tb/cpu_0/pc" type="array">
+      <obj_property name="ElementShortName">pc[31:0]</obj_property>
+      <obj_property name="ObjectShortName">pc[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_with_UART_tb/cpu_0/instruction" type="array">
+      <obj_property name="ElementShortName">instruction[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instruction[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_with_UART_tb/Tx_Serial" type="logic">
+      <obj_property name="ElementShortName">Tx_Serial</obj_property>
+      <obj_property name="ObjectShortName">Tx_Serial</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_with_UART_tb/IM_Done" type="logic">
+      <obj_property name="ElementShortName">IM_Done</obj_property>
+      <obj_property name="ObjectShortName">IM_Done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_with_UART_tb/DM_Done" type="logic">
+      <obj_property name="ElementShortName">DM_Done</obj_property>
+      <obj_property name="ObjectShortName">DM_Done</obj_property>
+   </wvobject>
+</wave_config>

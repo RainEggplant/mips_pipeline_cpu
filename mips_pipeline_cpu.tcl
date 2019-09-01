@@ -112,6 +112,7 @@ set_property -name "part" -value "xc7a35tcsg324-1" -objects $obj
 set_property -name "sim.central_dir" -value "$proj_dir/${_xil_proj_name_}.ip_user_files" -objects $obj
 set_property -name "sim.ip.auto_export_scripts" -value "1" -objects $obj
 set_property -name "simulator_language" -value "Mixed" -objects $obj
+set_property -name "source_mgmt_mode" -value "DisplayOnly" -objects $obj
 set_property -name "webtalk.activehdl_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.ies_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.modelsim_export_sim" -value "2" -objects $obj
@@ -119,7 +120,7 @@ set_property -name "webtalk.questa_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.riviera_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.vcs_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.xsim_export_sim" -value "1" -objects $obj
-set_property -name "webtalk.xsim_launch_sim" -value "284" -objects $obj
+set_property -name "webtalk.xsim_launch_sim" -value "340" -objects $obj
 
 # Create 'sources_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sources_1] ""]} {
@@ -150,6 +151,9 @@ set files [list \
  [file normalize "${origin_dir}/src/designs/external_devices/SSD.v"] \
  [file normalize "${origin_dir}/src/designs/external_devices/SysTick.v"] \
  [file normalize "${origin_dir}/src/designs/external_devices/Timer.v"] \
+ [file normalize "${origin_dir}/src/designs/external_devices/UART.v"] \
+ [file normalize "${origin_dir}/src/designs/external_devices/UART_Rx.v"] \
+ [file normalize "${origin_dir}/src/designs/external_devices/UART_Tx.v"] \
  [file normalize "${origin_dir}/src/designs/top.v"] \
 ]
 add_files -norecurse -fileset $obj $files
@@ -184,32 +188,6 @@ set_property -name "file_type" -value "XDC" -objects $file_obj
 # Set 'constrs_1' fileset properties
 set obj [get_filesets constrs_1]
 set_property -name "target_part" -value "xc7a35tcsg324-1" -objects $obj
-
-# Create 'sim_1' fileset (if not found)
-if {[string equal [get_filesets -quiet sim_1] ""]} {
-  create_fileset -simset sim_1
-}
-
-# Set 'sim_1' fileset object
-set obj [get_filesets sim_1]
-set files [list \
- [file normalize "${origin_dir}/src/testbenches/cpu_tb.v"] \
- [file normalize "${origin_dir}/src/testbenches/test_cpu_behav.wcfg"] \
-]
-add_files -norecurse -fileset $obj $files
-
-# Set 'sim_1' fileset file properties for remote files
-# None
-
-# Set 'sim_1' fileset file properties for local files
-# None
-
-# Set 'sim_1' fileset properties
-set obj [get_filesets sim_1]
-set_property -name "nl.mode" -value "funcsim" -objects $obj
-set_property -name "top" -value "test_cpu" -objects $obj
-set_property -name "top_auto_set" -value "0" -objects $obj
-set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
 
 # Create 'register_file_tb' fileset (if not found)
 if {[string equal [get_filesets -quiet register_file_tb] ""]} {
@@ -258,6 +236,80 @@ set obj [get_filesets data_memory_tb]
 set_property -name "top" -value "DataMemory_tb" -objects $obj
 set_property -name "top_auto_set" -value "0" -objects $obj
 set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
+
+# Create 'cpu_tb' fileset (if not found)
+if {[string equal [get_filesets -quiet cpu_tb] ""]} {
+  create_fileset -simset cpu_tb
+}
+
+# Set 'cpu_tb' fileset object
+set obj [get_filesets cpu_tb]
+set files [list \
+ [file normalize "${origin_dir}/src/testbenches/CPU_tb.v"] \
+ [file normalize "${origin_dir}/src/testbenches/CPU_tb_behav.wcfg"] \
+ [file normalize "${origin_dir}/src/testbenches/assembly/test_data_0.hex"] \
+ [file normalize "${origin_dir}/src/testbenches/assembly/test_code_0.hex"] \
+]
+add_files -norecurse -fileset $obj $files
+
+# Set 'cpu_tb' fileset file properties for remote files
+set file "$origin_dir/src/testbenches/assembly/test_data_0.hex"
+set file [file normalize $file]
+set file_obj [get_files -of_objects [get_filesets cpu_tb] [list "*$file"]]
+set_property -name "file_type" -value "Unknown" -objects $file_obj
+
+set file "$origin_dir/src/testbenches/assembly/test_code_0.hex"
+set file [file normalize $file]
+set file_obj [get_files -of_objects [get_filesets cpu_tb] [list "*$file"]]
+set_property -name "file_type" -value "Unknown" -objects $file_obj
+
+
+# Set 'cpu_tb' fileset file properties for local files
+# None
+
+# Set 'cpu_tb' fileset properties
+set obj [get_filesets cpu_tb]
+set_property -name "top" -value "CPU_tb" -objects $obj
+set_property -name "top_auto_set" -value "0" -objects $obj
+set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
+set_property -name "xsim.simulate.runtime" -value "0" -objects $obj
+
+# Create 'cpu_with_uart_tb' fileset (if not found)
+if {[string equal [get_filesets -quiet cpu_with_uart_tb] ""]} {
+  create_fileset -simset cpu_with_uart_tb
+}
+
+# Set 'cpu_with_uart_tb' fileset object
+set obj [get_filesets cpu_with_uart_tb]
+set files [list \
+ [file normalize "${origin_dir}/src/testbenches/CPU_with_UART_tb.v"] \
+ [file normalize "${origin_dir}/src/testbenches/CPU_with_UART_tb_behav.wcfg"] \
+ [file normalize "${origin_dir}/src/testbenches/assembly/test_data_0.hex"] \
+ [file normalize "${origin_dir}/src/testbenches/assembly/test_code_0.hex"] \
+]
+add_files -norecurse -fileset $obj $files
+
+# Set 'cpu_with_uart_tb' fileset file properties for remote files
+set file "$origin_dir/src/testbenches/assembly/test_data_0.hex"
+set file [file normalize $file]
+set file_obj [get_files -of_objects [get_filesets cpu_with_uart_tb] [list "*$file"]]
+set_property -name "file_type" -value "Unknown" -objects $file_obj
+
+set file "$origin_dir/src/testbenches/assembly/test_code_0.hex"
+set file [file normalize $file]
+set file_obj [get_files -of_objects [get_filesets cpu_with_uart_tb] [list "*$file"]]
+set_property -name "file_type" -value "Unknown" -objects $file_obj
+
+
+# Set 'cpu_with_uart_tb' fileset file properties for local files
+# None
+
+# Set 'cpu_with_uart_tb' fileset properties
+set obj [get_filesets cpu_with_uart_tb]
+set_property -name "top" -value "CPU_with_UART_tb" -objects $obj
+set_property -name "top_auto_set" -value "0" -objects $obj
+set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
+set_property -name "xsim.simulate.runtime" -value "0" -objects $obj
 
 # Set 'utils_1' fileset object
 set obj [get_filesets utils_1]

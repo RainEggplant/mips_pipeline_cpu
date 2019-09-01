@@ -1,16 +1,24 @@
 /*
 TODO:
   1. More instructions support 
-  2. External devices support
-  3. Move ForwardControlEX to ID to see if it optimizes timing
-  4. Add forwarding from MEM to ID to see if it optimizes timing
+  2. Move ForwardControlEX to ID to see if it optimizes timing
+  3. Add forwarding from MEM to ID to see if it optimizes timing
 */
 
-module CPU(clk, reset, led, ssd);
+module CPU(
+         clk, reset,
+         uart_on, uart_mode, uart_ram_id, Rx_Serial,
+         led, ssd, Tx_Serial
+       );
 input clk;
 input reset;
+input uart_on;
+input uart_mode;
+input uart_ram_id;
+input Rx_Serial;
 output [7:0] led;
 output [11:0] ssd;
+output Tx_Serial;
 
 wire IRQ;
 wire ExceptionOrInterrupt;
@@ -31,7 +39,7 @@ assign pc_plus_4 = pc + 32'd4;
 
 // Fetch instruction
 wire [31:0] instruction;
-InstructionMemory instr_mem(.address({1'b0, pc[30:0]}), .instruction(instruction));
+// The instr_mem has been moved to pseudo bus
 IF_ID_Reg if_id(
             .clk(clk), .reset(reset), .wr_en(~DataHazard || ExceptionOrInterrupt),
             .Flush(ExceptionOrInterrupt || JumpHazard || BranchHazard),
@@ -67,11 +75,11 @@ Control control(
 
 assign JumpHazard = PCSrc == 3'b001 || PCSrc == 3'b010;
 
-wire [31:0] pc_on_break;
-PCOnBreak pc_on_break_0(
+wire [31:0] pc_on_brk;
+PCOnBreak pc_on_break(
             .clk(clk), .reset(reset),
             .wr_en(~(DataHazard || JumpHazard || BranchHazard || Branch)),
-            .pc_in(pc), .pc_on_break(pc_on_break)
+            .pc_in(pc), .pc_on_break(pc_on_brk)
           );
 
 // Determine dest register
@@ -87,7 +95,7 @@ assign write_addr =
 wire [31:0] rs;
 wire [31:0] rt;
 wire [31:0] mem_data;
-RegisterFile reg_file_1(
+RegisterFile reg_file(
                .clk(clk), .reset(reset),
                .RegWrite(mem_wb.RegWrite), .write_addr(mem_wb.write_addr), .write_data(mem_data),
                .read_addr_1(if_id.instr[25:21]), .read_addr_2(if_id.instr[20:16]),
@@ -138,7 +146,7 @@ ID_EX_Reg id_ex(
             .clk(clk), .reset(reset), .Flush(DataHazard || BranchHazard),
             .rs_addr_in(if_id.instr[25:21]), .rt_addr_in(if_id.instr[20:16]), .rd_addr_in(if_id.instr[15:11]),
             .shamt_in(if_id.instr[10:6]), .funct_in(if_id.instr[5:0]), .write_addr_in(write_addr),
-            .rs_in(rs), .rt_in(rt), .imm_in(imm_out), .pc_next_in(ExceptionOrInterrupt ? pc_on_break : if_id.pc_next),
+            .rs_in(rs), .rt_in(rt), .imm_in(imm_out), .pc_next_in(ExceptionOrInterrupt ? pc_on_brk : if_id.pc_next),
             .Branch_in(Branch), .ALUOp_in(ALUOp), .ALUSrc1_in(ALUSrc1), .ALUSrc2_in(ALUSrc2), .RegDst_in(RegDst),
             .MemRead_in(MemRead),	.MemWrite_in(MemWrite),
             .MemtoReg_in(MemtoReg), .RegWrite_in(RegWrite)
@@ -147,7 +155,7 @@ ID_EX_Reg id_ex(
 // STAGE 3: EX
 wire [4:0] ALUCtl;
 wire Sign;
-ALUControl alu_control_1(.ALUOp(id_ex.ALUOp), .funct(id_ex.funct), .ALUCtl(ALUCtl), .Sign(Sign));
+ALUControl alu_control(.ALUOp(id_ex.ALUOp), .funct(id_ex.funct), .ALUCtl(ALUCtl), .Sign(Sign));
 
 wire [1:0] ForwardA_EX;
 wire [1:0] ForwardB_EX;
@@ -187,8 +195,12 @@ EX_MEM_Reg ex_mem(
 // STAGE 4: MEM
 wire [31:0] mem_out;
 Bus bus(
-      .clk(clk), .reset(reset), .MemRead(ex_mem.MemRead), .MemWrite(ex_mem.MemWrite), .address(ex_mem.alu_out),
-      .write_data(ex_mem.rt), .read_data(mem_out), .IRQ(IRQ), .led(led), .ssd(ssd)
+      .clk(clk), .reset(reset), .pc({1'b0, pc[30:0]}),
+      .MemRead(ex_mem.MemRead), .MemWrite(ex_mem.MemWrite),
+      .address(ex_mem.alu_out), .write_data(ex_mem.rt),
+      .uart_on(uart_on), .uart_mode(uart_mode), .uart_ram_id(uart_ram_id), .Rx_Serial(Rx_Serial),
+      .instruction(instruction), .read_data(mem_out),
+      .IRQ(IRQ), .led(led), .ssd(ssd), .Tx_Serial(Tx_Serial)
     );
 
 MEM_WB_Reg mem_wb(
