@@ -47,10 +47,11 @@ IF_ID_Reg if_id(
 // STAGE 2: ID
 // Define control signals
 wire [2:0] PCSrc;
-wire Branch;
+wire [1:0] RegDst;
 wire ExtOp;
 wire LuOp;
-wire [1:0] RegDst;
+wire Branch;
+wire [2:0] BranchOp;
 wire [3:0] ALUOp;
 wire ALUSrc1;
 wire ALUSrc2;
@@ -64,10 +65,10 @@ Control control(
           .Supervised(pc[31] || if_id.pc_next[31]), .IRQ(IRQ), // it is safe to use pc_next
           .opcode(if_id.instr[31:26]), .funct(if_id.instr[5:0]),
           .ExceptionOrInterrupt(ExceptionOrInterrupt),
-          .PCSrc(PCSrc), .Branch(Branch),
-          .ExtOp(ExtOp), .LuOp(LuOp),
+          .PCSrc(PCSrc), .RegDst(RegDst), .ExtOp(ExtOp), .LuOp(LuOp),
+          .Branch(Branch), .BranchOp(BranchOp),
           .ALUOp(ALUOp), .ALUSrc1(ALUSrc1), .ALUSrc2(ALUSrc2),
-          .MemRead(MemRead), .MemWrite(MemWrite), .RegDst(RegDst),
+          .MemRead(MemRead), .MemWrite(MemWrite),
           .MemToReg(MemToReg), .RegWrite(RegWrite)
         );
 
@@ -152,7 +153,7 @@ ID_EX_Reg id_ex(
             .shamt_in(if_id.instr[10:6]), .funct_in(if_id.instr[5:0]), .write_addr_in(write_addr),
             .rs_in(latest_rs_id), .rt_in(latest_rt_id), .imm_in(imm_out),
             .pc_next_in(ExceptionOrInterrupt ? pc_on_break : if_id.pc_next),
-            .Branch_in(Branch), .ALUOp_in(ALUOp), .ALUSrc1_in(ALUSrc1), .ALUSrc2_in(ALUSrc2), .RegDst_in(RegDst),
+            .Branch_in(Branch), .BranchOp_in(BranchOp), .ALUOp_in(ALUOp), .ALUSrc1_in(ALUSrc1), .ALUSrc2_in(ALUSrc2),
             .ForwardA_EX_in(ForwardA_EX), .ForwardB_EX_in(ForwardB_EX),
             .MemRead_in(MemRead),	.MemWrite_in(MemWrite),
             .MemToReg_in(MemToReg), .RegWrite_in(RegWrite)
@@ -175,11 +176,12 @@ wire [31:0] alu_in_1 = id_ex.ALUSrc1 ? {27'h00000, id_ex.shamt} : latest_rs;
 wire [31:0] alu_in_2 = id_ex.ALUSrc2 ? id_ex.imm : latest_rt;
 
 wire [31:0] alu_out;
-wire Zero;
-ALU alu1(.in_1(alu_in_1), .in_2(alu_in_2), .ALUCtl(ALUCtl), .Sign(Sign), .out(alu_out), .zero(Zero));
+ALU alu1(.in_1(alu_in_1), .in_2(alu_in_2), .ALUCtl(ALUCtl), .Sign(Sign), .out(alu_out));
 
-wire Equal = latest_rs == latest_rt;
-assign BranchHazard = id_ex.Branch & Equal;
+BranchTest branch_test(
+             .Branch(id_ex.Branch), .BranchOp(id_ex.BranchOp),
+             .in_1(latest_rs), .in_2(latest_rt), .BranchHazard(BranchHazard)
+           );
 assign branch_target =  id_ex.pc_next + {id_ex.imm[29:0], 2'b00};
 
 EX_MEM_Reg ex_mem(

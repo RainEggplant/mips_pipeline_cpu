@@ -1,5 +1,5 @@
 `timescale 1ns / 1ns
-module CPU_tb();
+module CPU_tb_insertion_sort();
 
 reg reset;
 reg clk;

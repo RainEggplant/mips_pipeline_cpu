@@ -1,13 +1,10 @@
 /* verilator lint_off WIDTH */
 
-module ALU(in_1, in_2, ALUCtl, Sign, out, zero);
+module ALU(in_1, in_2, ALUCtl, Sign, out);
 input [31:0] in_1, in_2;
 input [4:0] ALUCtl;
 input Sign;
 output reg [31:0] out;
-output zero;
-
-assign zero = (out == 0);
 
 wire [1:0] ss;
 assign ss = {in_1[31], in_2[31]};

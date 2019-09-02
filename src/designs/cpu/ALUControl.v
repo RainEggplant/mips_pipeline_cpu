@@ -64,8 +64,6 @@ always @(*)
   case (ALUOp[2:0])
     3'b000:
       ALUCtl = ALU_ADD;
-    3'b001:
-      ALUCtl = ALU_SUB;
     3'b100:
       ALUCtl = ALU_AND;
     3'b101:

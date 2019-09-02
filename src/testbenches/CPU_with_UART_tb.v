@@ -49,7 +49,7 @@ initial
     $display("Loading data into data_mem ...");
     $readmemh("test_data_0.hex", data);
     uart_ram_id = 1;
-    for (i = 0; i < 1; i = i + 1)
+    for (i = 0; i < 3; i = i + 1)
       begin
         for (j = 0; j < 32; j = j + 1)
           begin
@@ -67,10 +67,11 @@ initial
     #10 uart_on = 0;
     reset = 0;
     #200 reset = 1;
+    $finish;
     $display("Start dumping data_mem via UART");
-    uart_ram_id = 1;
-    uart_mode = 1;
-    #10 uart_on = 1;
+    #20 uart_ram_id = 1;
+    #20 uart_mode = 1;
+    #20 uart_on = 1;
   end
 
 always #5 clk = ~clk;

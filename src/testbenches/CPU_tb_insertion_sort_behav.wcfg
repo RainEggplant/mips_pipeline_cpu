@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="CPU_tb_insertion_sort_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="CPU_tb_insertion_sort" />
+            <top_module name="glbl" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="345861750000fs"></ZoomStartTime>
+      <ZoomEndTime time="345927650001fs"></ZoomEndTime>
+      <Cursor1Time time="345970000000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="163"></NameColumnWidth>
+      <ValueColumnWidth column_width="80"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="18" />
+   <wvobject fp_name="/CPU_tb_insertion_sort/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/reset" type="logic">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/IRQ" type="logic">
+      <obj_property name="ElementShortName">IRQ</obj_property>
+      <obj_property name="ObjectShortName">IRQ</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/pc" type="array">
+      <obj_property name="ElementShortName">pc[31:0]</obj_property>
+      <obj_property name="ObjectShortName">pc[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/instruction" type="array">
+      <obj_property name="ElementShortName">instruction[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instruction[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/pc_next" type="array">
+      <obj_property name="ElementShortName">pc_next[31:0]</obj_property>
+      <obj_property name="ObjectShortName">pc_next[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/reg_file/rf_data[16]" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[16][31:0]</obj_property>
+      <obj_property name="ObjectShortName">[16][31:0]</obj_property>
+      <obj_property name="label">$s0:i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/reg_file/rf_data[17]" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[17][31:0]</obj_property>
+      <obj_property name="ObjectShortName">[17][31:0]</obj_property>
+      <obj_property name="label">$s1:j</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/reg_file/rf_data[18]" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[18][31:0]</obj_property>
+      <obj_property name="ObjectShortName">[18][31:0]</obj_property>
+      <obj_property name="label">$s2:v</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/reg_file/rf_data[19]" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[19][31:0]</obj_property>
+      <obj_property name="ObjectShortName">[19][31:0]</obj_property>
+      <obj_property name="label">$s3:n</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/reg_file/rf_data[10]" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[10][31:0]</obj_property>
+      <obj_property name="ObjectShortName">[10][31:0]</obj_property>
+      <obj_property name="label">$t2:v[j]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/reg_file/rf_data[11]" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[11][31:0]</obj_property>
+      <obj_property name="ObjectShortName">[11][31:0]</obj_property>
+      <obj_property name="label">$t3:v[j+1]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/DataHazard" type="logic">
+      <obj_property name="ElementShortName">DataHazard</obj_property>
+      <obj_property name="ObjectShortName">DataHazard</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/JumpHazard" type="logic">
+      <obj_property name="ElementShortName">JumpHazard</obj_property>
+      <obj_property name="ObjectShortName">JumpHazard</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/BranchHazard" type="logic">
+      <obj_property name="ElementShortName">BranchHazard</obj_property>
+      <obj_property name="ObjectShortName">BranchHazard</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/reg_file/rf_data[8]" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[8][31:0]</obj_property>
+      <obj_property name="ObjectShortName">[8][31:0]</obj_property>
+      <obj_property name="label">$t0</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/reg_file/rf_data[12]" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[12][31:0]</obj_property>
+      <obj_property name="ObjectShortName">[12][31:0]</obj_property>
+      <obj_property name="label">$t4</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/bus/ssd_0/ssd" type="array">
+      <obj_property name="ElementShortName">ssd[31:0]</obj_property>
+      <obj_property name="ObjectShortName">ssd[31:0]</obj_property>
+   </wvobject>
+</wave_config>

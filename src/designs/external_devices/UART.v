@@ -6,9 +6,9 @@ module UART(
 parameter CLKS_PER_BIT = 16'd10417;  // 100M/9600
 parameter IM_SIZE = 256;
 parameter IM_SIZE_BIT = 8;
-parameter DM_SIZE = 512;
-parameter DM_SIZE_BIT = 9;
-parameter MAX_SIZE_BIT = 9;
+parameter DM_SIZE = 256;
+parameter DM_SIZE_BIT = 8;
+parameter MAX_SIZE_BIT = 8;
 
 input clk;
 input en;
@@ -127,6 +127,7 @@ always @ (posedge clk)
             // sending
             if (~ready)
               begin
+                addr <= 0;
                 dm_addr <= 0;
                 DM_Done <= 0;
                 byte_cnt <= 2'd0;

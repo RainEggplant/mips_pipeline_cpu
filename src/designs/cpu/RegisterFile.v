@@ -28,7 +28,7 @@ always @(posedge clk)
       for (i = 1; i < 29; i = i + 1)
         rf_data[i] <= 32'h00000000;
 
-      rf_data[29] <= 32'h00000800;
+      rf_data[29] <= 32'h00000400;
       rf_data[30] <= 32'h00000000;
       rf_data[31] <= 32'h00000000;
     end

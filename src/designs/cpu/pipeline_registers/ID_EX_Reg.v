@@ -4,7 +4,8 @@ module ID_EX_Reg(
          clk, reset, Flush,
          shamt_in, funct_in, write_addr_in,
          rs_in, rt_in, imm_in, pc_next_in,
-         Branch_in, ALUOp_in, ALUSrc1_in, ALUSrc2_in, RegDst_in, ForwardA_EX_in, ForwardB_EX_in,
+         Branch_in, BranchOp_in, ALUOp_in, ALUSrc1_in, ALUSrc2_in,
+         ForwardA_EX_in, ForwardB_EX_in,
          MemRead_in, MemWrite_in,
          MemToReg_in, RegWrite_in
        );
@@ -23,10 +24,10 @@ input [31:0] pc_next_in;
 
 // EX control
 input Branch_in;
+input [2:0] BranchOp_in;
 input [3:0] ALUOp_in;
 input ALUSrc1_in;
 input ALUSrc2_in;
-input [1:0] RegDst_in;
 input [1:0] ForwardA_EX_in;
 input [1:0] ForwardB_EX_in;
 
@@ -46,10 +47,10 @@ reg [31:0] rt;
 reg [31:0] imm;
 reg [31:0] pc_next;
 reg Branch;
+reg [2:0] BranchOp;
 reg [3:0] ALUOp;
 reg ALUSrc1;
 reg ALUSrc2;
-reg [1:0] RegDst;
 reg [1:0] ForwardA_EX;
 reg [1:0] ForwardB_EX;
 reg MemRead;
@@ -69,10 +70,10 @@ always @ (posedge clk)
         imm <= imm_in;
         pc_next <= pc_next_in;
         Branch <= Branch_in;
+        BranchOp <= BranchOp_in;
         ALUOp <= ALUOp_in;
         ALUSrc1 <= ALUSrc1_in;
         ALUSrc2 <= ALUSrc2_in;
-        RegDst <= RegDst_in;
         ForwardA_EX <= ForwardA_EX_in;
         ForwardB_EX <= ForwardB_EX_in;
         MemRead <= Flush ? 0 : MemRead_in;
@@ -90,10 +91,10 @@ always @ (posedge clk)
         imm <= 32'h00000000;
         pc_next <= 32'h00000000;
         Branch <= 0;
+        BranchOp <= 3'b000;
         ALUOp <= 4'b0000;
         ALUSrc1 <= 0;
         ALUSrc2 <= 0;
-        RegDst <= 2'b00;
         ForwardA_EX <= 2'b00;
         ForwardB_EX <= 2'b00;
         MemRead <= 0;

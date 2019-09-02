@@ -1,8 +1,8 @@
 module Control(
          Supervised, IRQ, opcode, funct,
          ExceptionOrInterrupt,
-         PCSrc, Branch, ExtOp, LuOp,
-         ALUOp, ALUSrc1, ALUSrc2, RegDst,
+         PCSrc, RegDst, ExtOp, LuOp,
+         Branch, BranchOp, ALUOp, ALUSrc1, ALUSrc2,
          MemRead, MemWrite,
          MemToReg, RegWrite
        );
@@ -14,15 +14,16 @@ input [5:0] funct;
 // ID control
 output ExceptionOrInterrupt;
 output reg [2:0] PCSrc;
-output Branch;
+output [1:0] RegDst;
 output ExtOp;
 output LuOp;
 
 // EX control
+output Branch;
+output [2:0] BranchOp;
 output [3:0] ALUOp;
 output ALUSrc1;
 output ALUSrc2;
-output [1:0] RegDst;
 
 // Mem control
 output MemRead;
@@ -63,15 +64,29 @@ always @ (*)
         3'b000;
   end
 
-assign Branch = (opcode == 6'h04) && ~ExceptionOrInterrupt;
+assign RegDst[1:0] =
+       ExceptionOrInterrupt ? 2'b11 :
+       (opcode == 6'h03) ? 2'b10 : // jal
+       (opcode == 6'h00) ? 2'b01 : // R-type
+       2'b00; // I-type
 
 assign ExtOp = ~(opcode == 6'h0c || opcode == 6'h0d); // andi, ori
 
 assign LuOp = (opcode == 6'h0f);
 
+assign Branch =
+       ~ExceptionOrInterrupt &&
+       (opcode == 6'h01 || (opcode >= 6'h04 && opcode <= 6'h07));
+
+assign BranchOp[2:0] =
+       (opcode == 6'h01) ? 3'b001: // bltz
+       (opcode == 6'h05) ? 3'b010: // bne
+       (opcode == 6'h06) ? 3'b011: // blez
+       (opcode == 6'h07) ? 3'b100: // bgtz
+       3'b000; // beq
+
 assign ALUOp[2:0] =
        (opcode == 6'h00) ? 3'b010: // R-type and jr, jalr
-       (opcode == 6'h04) ? 3'b001: // beq
        (opcode == 6'h0c) ? 3'b100: // andi
        (opcode == 6'h0d) ? 3'b101: // ori
        (opcode == 6'h0a || opcode == 6'h0b)? 3'b110: // slti or sltiu
@@ -84,12 +99,6 @@ assign ALUSrc1 =
 
 assign ALUSrc2 =
        ~(opcode == 6'h00 || opcode == 6'h04);
-
-assign RegDst[1:0] =
-       ExceptionOrInterrupt ? 2'b11 :
-       (opcode == 6'h03) ? 2'b10 : // jal
-       (opcode == 6'h00) ? 2'b01 : // R-type
-       2'b00; // I-type
 
 assign MemRead = (opcode == 6'h23) & ~ExceptionOrInterrupt;
 

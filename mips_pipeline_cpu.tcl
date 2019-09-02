@@ -120,7 +120,7 @@ set_property -name "webtalk.questa_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.riviera_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.vcs_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.xsim_export_sim" -value "1" -objects $obj
-set_property -name "webtalk.xsim_launch_sim" -value "350" -objects $obj
+set_property -name "webtalk.xsim_launch_sim" -value "377" -objects $obj
 
 # Create 'sources_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sources_1] ""]} {
@@ -154,6 +154,7 @@ set files [list \
  [file normalize "${origin_dir}/src/designs/external_devices/UART_Tx.v"] \
  [file normalize "${origin_dir}/src/designs/top.v"] \
  [file normalize "${origin_dir}/src/designs/cpu/ForwardControl.v"] \
+ [file normalize "${origin_dir}/src/designs/cpu/BranchTest.v"] \
 ]
 add_files -norecurse -fileset $obj $files
 
@@ -310,6 +311,43 @@ set_property -name "top_auto_set" -value "0" -objects $obj
 set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
 set_property -name "xsim.simulate.runtime" -value "0" -objects $obj
 
+# Create 'cpu_tb_insertion_sort' fileset (if not found)
+if {[string equal [get_filesets -quiet cpu_tb_insertion_sort] ""]} {
+  create_fileset -simset cpu_tb_insertion_sort
+}
+
+# Set 'cpu_tb_insertion_sort' fileset object
+set obj [get_filesets cpu_tb_insertion_sort]
+set files [list \
+ [file normalize "${origin_dir}/src/testbenches/CPU_tb_insertion_sort.v"] \
+ [file normalize "${origin_dir}/src/testbenches/CPU_tb_insertion_sort_behav.wcfg"] \
+ [file normalize "${origin_dir}/src/testbenches/assembly/insertion_sort.hex"] \
+ [file normalize "${origin_dir}/src/testbenches/assembly/insertion_sort_data.hex"] \
+]
+add_files -norecurse -fileset $obj $files
+
+# Set 'cpu_tb_insertion_sort' fileset file properties for remote files
+set file "$origin_dir/src/testbenches/assembly/insertion_sort.hex"
+set file [file normalize $file]
+set file_obj [get_files -of_objects [get_filesets cpu_tb_insertion_sort] [list "*$file"]]
+set_property -name "file_type" -value "Unknown" -objects $file_obj
+
+set file "$origin_dir/src/testbenches/assembly/insertion_sort_data.hex"
+set file [file normalize $file]
+set file_obj [get_files -of_objects [get_filesets cpu_tb_insertion_sort] [list "*$file"]]
+set_property -name "file_type" -value "Unknown" -objects $file_obj
+
+
+# Set 'cpu_tb_insertion_sort' fileset file properties for local files
+# None
+
+# Set 'cpu_tb_insertion_sort' fileset properties
+set obj [get_filesets cpu_tb_insertion_sort]
+set_property -name "top" -value "CPU_tb_insertion_sort" -objects $obj
+set_property -name "top_auto_set" -value "0" -objects $obj
+set_property -name "top_lib" -value "xil_defaultlib" -objects $obj
+set_property -name "xsim.simulate.runtime" -value "0" -objects $obj
+
 # Set 'utils_1' fileset object
 set obj [get_filesets utils_1]
 # Empty (no sources present)
@@ -338,7 +376,6 @@ set_property -name "display_name" -value "synth_1_synth_report_utilization_0" -o
 
 }
 set obj [get_runs synth_1]
-set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "part" -value "xc7a35tcsg324-1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
@@ -563,7 +600,6 @@ set_property -name "display_name" -value "impl_1_post_route_phys_opt_report_bus_
 
 }
 set obj [get_runs impl_1]
-set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "part" -value "xc7a35tcsg324-1" -objects $obj
 set_property -name "strategy" -value "Performance_ExtraTimingOpt" -objects $obj
 set_property -name "steps.place_design.args.directive" -value "ExtraTimingOpt" -objects $obj
