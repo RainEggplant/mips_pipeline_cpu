@@ -120,7 +120,7 @@ set_property -name "webtalk.questa_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.riviera_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.vcs_export_sim" -value "1" -objects $obj
 set_property -name "webtalk.xsim_export_sim" -value "1" -objects $obj
-set_property -name "webtalk.xsim_launch_sim" -value "377" -objects $obj
+set_property -name "webtalk.xsim_launch_sim" -value "423" -objects $obj
 
 # Create 'sources_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sources_1] ""]} {
@@ -247,18 +247,12 @@ set obj [get_filesets cpu_tb]
 set files [list \
  [file normalize "${origin_dir}/src/testbenches/CPU_tb.v"] \
  [file normalize "${origin_dir}/src/testbenches/CPU_tb_behav.wcfg"] \
- [file normalize "${origin_dir}/src/testbenches/assembly/test_data_0.hex"] \
- [file normalize "${origin_dir}/src/testbenches/assembly/test_code_0.hex"] \
+ [file normalize "${origin_dir}/src/testbenches/assembly/timer.hex"] \
 ]
 add_files -norecurse -fileset $obj $files
 
 # Set 'cpu_tb' fileset file properties for remote files
-set file "$origin_dir/src/testbenches/assembly/test_data_0.hex"
-set file [file normalize $file]
-set file_obj [get_files -of_objects [get_filesets cpu_tb] [list "*$file"]]
-set_property -name "file_type" -value "Unknown" -objects $file_obj
-
-set file "$origin_dir/src/testbenches/assembly/test_code_0.hex"
+set file "$origin_dir/src/testbenches/assembly/timer.hex"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets cpu_tb] [list "*$file"]]
 set_property -name "file_type" -value "Unknown" -objects $file_obj
@@ -284,18 +278,18 @@ set obj [get_filesets cpu_with_uart_tb]
 set files [list \
  [file normalize "${origin_dir}/src/testbenches/CPU_with_UART_tb.v"] \
  [file normalize "${origin_dir}/src/testbenches/CPU_with_UART_tb_behav.wcfg"] \
- [file normalize "${origin_dir}/src/testbenches/assembly/test_data_0.hex"] \
- [file normalize "${origin_dir}/src/testbenches/assembly/test_code_0.hex"] \
+ [file normalize "${origin_dir}/src/testbenches/assembly/uart.hex"] \
+ [file normalize "${origin_dir}/src/testbenches/assembly/uart_data.hex"] \
 ]
 add_files -norecurse -fileset $obj $files
 
 # Set 'cpu_with_uart_tb' fileset file properties for remote files
-set file "$origin_dir/src/testbenches/assembly/test_data_0.hex"
+set file "$origin_dir/src/testbenches/assembly/uart.hex"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets cpu_with_uart_tb] [list "*$file"]]
 set_property -name "file_type" -value "Unknown" -objects $file_obj
 
-set file "$origin_dir/src/testbenches/assembly/test_code_0.hex"
+set file "$origin_dir/src/testbenches/assembly/uart_data.hex"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets cpu_with_uart_tb] [list "*$file"]]
 set_property -name "file_type" -value "Unknown" -objects $file_obj
@@ -319,8 +313,8 @@ if {[string equal [get_filesets -quiet cpu_tb_insertion_sort] ""]} {
 # Set 'cpu_tb_insertion_sort' fileset object
 set obj [get_filesets cpu_tb_insertion_sort]
 set files [list \
- [file normalize "${origin_dir}/src/testbenches/CPU_tb_insertion_sort.v"] \
  [file normalize "${origin_dir}/src/testbenches/CPU_tb_insertion_sort_behav.wcfg"] \
+ [file normalize "${origin_dir}/src/testbenches/CPU_tb_insertion_sort.v"] \
  [file normalize "${origin_dir}/src/testbenches/assembly/insertion_sort.hex"] \
  [file normalize "${origin_dir}/src/testbenches/assembly/insertion_sort_data.hex"] \
 ]
@@ -357,9 +351,9 @@ set obj [get_filesets utils_1]
 
 # Create 'synth_1' run (if not found)
 if {[string equal [get_runs -quiet synth_1] ""]} {
-    create_run -name synth_1 -part xc7a35tcsg324-1 -flow {Vivado Synthesis 2018} -strategy "Vivado Synthesis Defaults" -report_strategy {No Reports} -constrset constrs_1
+    create_run -name synth_1 -part xc7a35tcsg324-1 -flow {Vivado Synthesis 2018} -strategy "Flow_AlternateRoutability" -report_strategy {No Reports} -constrset constrs_1
 } else {
-  set_property strategy "Vivado Synthesis Defaults" [get_runs synth_1]
+  set_property strategy "Flow_AlternateRoutability" [get_runs synth_1]
   set_property flow "Vivado Synthesis 2018" [get_runs synth_1]
 }
 set obj [get_runs synth_1]
@@ -376,8 +370,12 @@ set_property -name "display_name" -value "synth_1_synth_report_utilization_0" -o
 
 }
 set obj [get_runs synth_1]
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "part" -value "xc7a35tcsg324-1" -objects $obj
-set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
+set_property -name "strategy" -value "Flow_AlternateRoutability" -objects $obj
+set_property -name "steps.synth_design.args.directive" -value "AlternateRoutability" -objects $obj
+set_property -name "steps.synth_design.args.no_lc" -value "1" -objects $obj
+set_property -name "steps.synth_design.args.shreg_min_size" -value "10" -objects $obj
 
 # set the current synth run
 current_run -synthesis [get_runs synth_1]
@@ -600,6 +598,7 @@ set_property -name "display_name" -value "impl_1_post_route_phys_opt_report_bus_
 
 }
 set obj [get_runs impl_1]
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "part" -value "xc7a35tcsg324-1" -objects $obj
 set_property -name "strategy" -value "Performance_ExtraTimingOpt" -objects $obj
 set_property -name "steps.place_design.args.directive" -value "ExtraTimingOpt" -objects $obj

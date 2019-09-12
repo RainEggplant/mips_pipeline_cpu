@@ -7,7 +7,6 @@ parameter PERIOD = 10;
 
 // RegisterFile Inputs
 reg clk = 1;
-reg MemRead = 0;
 reg MemWrite = 0;
 reg [31:0] address = 32'h00000000;
 reg [31:0] write_data = 32'h00000000;
@@ -22,14 +21,14 @@ initial
   end
 
 DataMemory data_mem(
-             .clk(clk), .MemRead(MemRead), .MemWrite(MemWrite), .address(address),
+             .clk(clk), .MemWrite(MemWrite), .address(address),
              .write_data(write_data), .read_data(read_data));
 
 initial
   begin
     #PERIOD
-     // Write to 0x1
-     MemWrite = 1;
+    // Write to 0x1
+    MemWrite = 1;
     address = 32'h00000004;
     write_data = 32'h11111111;
     // Write to 0x2
@@ -40,7 +39,6 @@ initial
     #PERIOD
      MemWrite = 0;
     address = 32'h00000004;
-    MemRead = 1;
     // Read 0x2
     #PERIOD
      address = 32'h00000008;

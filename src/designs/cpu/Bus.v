@@ -6,9 +6,7 @@ module Bus(
          instruction, read_data,
          IRQ, led, ssd, Tx_Serial
        );
-parameter IM_SIZE = 256;
 parameter IM_SIZE_BIT = 8;
-parameter DM_SIZE = 256;
 parameter DM_SIZE_BIT = 8;
 parameter MAX_SIZE_BIT = 8;
 
@@ -50,7 +48,7 @@ wire en_LED = address == 32'h4000000C;
 wire en_SSD = address == 32'h40000010;
 
 
-InstructionMemory #(.RAM_SIZE(IM_SIZE), .RAM_SIZE_BIT(IM_SIZE_BIT)) instr_mem_0(
+InstructionMemory #(.RAM_SIZE_BIT(IM_SIZE_BIT)) instr_mem_0(
                     .clk(clk),
                     .MemWrite(en_UART && uart_ram_id == 0 && on_received),
                     .address(en_UART ? uart_addr[IM_SIZE_BIT - 1:0] : pc[IM_SIZE_BIT + 1:2]),
@@ -58,16 +56,16 @@ InstructionMemory #(.RAM_SIZE(IM_SIZE), .RAM_SIZE_BIT(IM_SIZE_BIT)) instr_mem_0(
                     .read_data(instruction)
                   );
 
-DataMemory #(.RAM_SIZE(DM_SIZE), .RAM_SIZE_BIT(DM_SIZE_BIT)) data_mem_0(
+DataMemory #(.RAM_SIZE_BIT(DM_SIZE_BIT)) data_mem_0(
              .clk(clk),
              .MemWrite((en_DM && MemWrite) || (en_UART && uart_ram_id == 1 && on_received)),
              .address(en_UART ? uart_addr[DM_SIZE_BIT - 1:0] : address[DM_SIZE_BIT + 1:2]),
              .write_data(en_UART ? recv_data : write_data), .read_data(read_data_DM)
            );
 
-UART #(.IM_SIZE(IM_SIZE), .IM_SIZE_BIT(IM_SIZE_BIT), .DM_SIZE(DM_SIZE), .DM_SIZE_BIT(DM_SIZE_BIT), .MAX_SIZE_BIT(MAX_SIZE_BIT))
+UART #(.IM_SIZE_BIT(IM_SIZE_BIT), .DM_SIZE_BIT(DM_SIZE_BIT), .MAX_SIZE_BIT(MAX_SIZE_BIT))
      uart_0(.clk(clk), .en(en_UART), .mode(uart_mode), .ram_id(uart_ram_id),
-            .Rx_Serial(Rx_Serial), .data_to_send(read_data_DM), .addr(uart_addr),
+            .Rx_Serial(Rx_Serial), .data_to_send(read_data_DM), .address(uart_addr),
             .on_received(on_received), .recv_data(recv_data), .Tx_Serial(Tx_Serial),
             .IM_Done(IM_Done), .DM_Done(DM_Done));
 

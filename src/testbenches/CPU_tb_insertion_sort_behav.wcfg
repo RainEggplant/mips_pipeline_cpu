@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="345861750000fs"></ZoomStartTime>
-      <ZoomEndTime time="345927650001fs"></ZoomEndTime>
-      <Cursor1Time time="345970000000fs"></Cursor1Time>
+      <ZoomStartTime time="342115000000fs"></ZoomStartTime>
+      <ZoomEndTime time="344725000001fs"></ZoomEndTime>
+      <Cursor1Time time="344290000000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="163"></NameColumnWidth>
-      <ValueColumnWidth column_width="80"></ValueColumnWidth>
+      <ValueColumnWidth column_width="75"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="18" />
+   <WVObjectSize size="19" />
    <wvobject fp_name="/CPU_tb_insertion_sort/clk" type="logic">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -107,5 +107,11 @@
    <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/bus/ssd_0/ssd" type="array">
       <obj_property name="ElementShortName">ssd[31:0]</obj_property>
       <obj_property name="ObjectShortName">ssd[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/CPU_tb_insertion_sort/cpu_0/reg_file/rf_data[2]" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">[2][31:0]</obj_property>
+      <obj_property name="ObjectShortName">[2][31:0]</obj_property>
+      <obj_property name="label">$v0</obj_property>
    </wvobject>
 </wave_config>

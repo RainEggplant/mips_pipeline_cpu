@@ -1,6 +1,6 @@
 module Control(
          Supervised, IRQ, opcode, funct,
-         ExceptionOrInterrupt,
+         ExceptionOrInterrupt, JumpHazard,
          PCSrc, RegDst, ExtOp, LuOp,
          Branch, BranchOp, ALUOp, ALUSrc1, ALUSrc2,
          MemRead, MemWrite,
@@ -13,6 +13,7 @@ input [5:0] funct;
 
 // ID control
 output ExceptionOrInterrupt;
+output JumpHazard;
 output reg [2:0] PCSrc;
 output [1:0] RegDst;
 output ExtOp;
@@ -33,23 +34,24 @@ output MemWrite;
 output [1:0] MemToReg;
 output RegWrite;
 
-wire Unsupported;
-assign Unsupported =
-       ~ ((opcode >= 6'h01 && opcode <= 6'h0d) ||
-          (opcode == 6'h0f || opcode == 6'h23 || opcode == 6'h2b) ||
-          (opcode == 6'h00 &&
-           (funct == 6'h00 ||
-            funct == 6'h02 ||
-            funct == 6'h03 ||
-            funct == 6'h08 ||
-            funct == 6'h09 ||
-            funct == 6'h2a ||
-            funct == 6'h2b ||
-            (funct >= 6'h20 && funct <= 6'h27)
-           )
-          ));
+wire Unsupported =
+     ~ ((opcode >= 6'h01 && opcode <= 6'h0d) ||
+        (opcode == 6'h0f || opcode == 6'h23 || opcode == 6'h2b) ||
+        (opcode == 6'h00 &&
+         (funct == 6'h00 ||
+          funct == 6'h02 ||
+          funct == 6'h03 ||
+          funct == 6'h08 ||
+          funct == 6'h09 ||
+          funct == 6'h2a ||
+          funct == 6'h2b ||
+          (funct >= 6'h20 && funct <= 6'h27)
+         )
+        ));
 
 assign ExceptionOrInterrupt = ~Supervised && (IRQ || Unsupported);
+
+assign JumpHazard = PCSrc == 3'b001 || PCSrc == 3'b010;
 
 always @ (*)
   begin

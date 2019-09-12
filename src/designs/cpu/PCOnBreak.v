@@ -12,13 +12,9 @@ always @ (posedge clk)
     if (~reset)
       begin
         if (wr_en)
-          begin
-            pc_on_break <= pc_in;
-          end
+          pc_on_break <= pc_in;
       end
     else
-      begin
-        pc_on_break <= 32'h00000000;
-      end
+      pc_on_break <= 32'h00000000;
   end
 endmodule

@@ -1,12 +1,10 @@
 module UART(
          clk, en, mode, ram_id, Rx_Serial, data_to_send,
-         addr, on_received, recv_data, Tx_Serial,
+         address, on_received, recv_data, Tx_Serial,
          IM_Done, DM_Done
        );
-parameter CLKS_PER_BIT = 16'd10417;  // 100M/9600
-parameter IM_SIZE = 256;
+parameter CLKS_PER_BIT = 16'd10417;  // 100 M / 9600
 parameter IM_SIZE_BIT = 8;
-parameter DM_SIZE = 256;
 parameter DM_SIZE_BIT = 8;
 parameter MAX_SIZE_BIT = 8;
 
@@ -16,7 +14,7 @@ input mode;
 input ram_id;
 input Rx_Serial;
 input [31:0] data_to_send;
-output reg [MAX_SIZE_BIT - 1 : 0] addr;
+output reg [MAX_SIZE_BIT - 1 : 0] address;
 output reg on_received;
 output reg [31:0] recv_data;
 output Tx_Serial;
@@ -90,17 +88,17 @@ always @ (posedge clk)
                     on_received <= 1;
                     recv_data <= {Rx_Byte, word_buf[23:0]};
                     // one-clock delay, exactly what we want
-                    addr <= ram_id == 0 ? im_addr : dm_addr;
+                    address <= ram_id == 0 ? im_addr : dm_addr;
 
                     // receive instruction
-                    if (im_addr == IM_SIZE - 1)
+                    if (im_addr == 2 ** IM_SIZE_BIT - 1)
                       IM_Done <= 1;
                     else if (im_receiving)
                       im_addr <= im_addr + 1;
 
                     // receive data
 
-                    if (dm_addr == DM_SIZE - 1)
+                    if (dm_addr == 2 ** DM_SIZE_BIT - 1)
                       DM_Done <= 1;
                     else if (dm_receiving)
                       dm_addr <= dm_addr + 1;
@@ -127,7 +125,7 @@ always @ (posedge clk)
             // sending
             if (~ready)
               begin
-                addr <= 0;
+                address <= 0;
                 dm_addr <= 0;
                 DM_Done <= 0;
                 byte_cnt <= 2'd0;
@@ -148,13 +146,13 @@ always @ (posedge clk)
                     if (byte_cnt == 2'd3)
                       begin
                         byte_cnt <= 2'd0;
-                        if (dm_addr < DM_SIZE - 1)
+                        if (dm_addr < 2 ** DM_SIZE_BIT - 1)
                           begin
-                            addr <= dm_addr + 1;
+                            address <= dm_addr + 1;
                             dm_addr <= dm_addr + 1;
                           end
 
-                        DM_Done <= dm_addr == DM_SIZE - 1;
+                        DM_Done <= dm_addr == 2 ** DM_SIZE_BIT - 1;
                       end
                     else
                       byte_cnt <= byte_cnt + 1;

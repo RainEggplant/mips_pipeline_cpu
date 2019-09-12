@@ -1,8 +1,3 @@
-/*
-TODO:
-  1. More instructions support 
-*/
-
 module CPU(
          clk, reset,
          uart_on, uart_mode, uart_ram_id, Rx_Serial,
@@ -64,15 +59,13 @@ wire RegWrite;
 Control control(
           .Supervised(pc[31] || if_id.pc_next[31]), .IRQ(IRQ), // it is safe to use pc_next
           .opcode(if_id.instr[31:26]), .funct(if_id.instr[5:0]),
-          .ExceptionOrInterrupt(ExceptionOrInterrupt),
+          .ExceptionOrInterrupt(ExceptionOrInterrupt), .JumpHazard(JumpHazard),
           .PCSrc(PCSrc), .RegDst(RegDst), .ExtOp(ExtOp), .LuOp(LuOp),
           .Branch(Branch), .BranchOp(BranchOp),
           .ALUOp(ALUOp), .ALUSrc1(ALUSrc1), .ALUSrc2(ALUSrc2),
           .MemRead(MemRead), .MemWrite(MemWrite),
           .MemToReg(MemToReg), .RegWrite(RegWrite)
         );
-
-assign JumpHazard = PCSrc == 3'b001 || PCSrc == 3'b010;
 
 wire [31:0] pc_on_break;
 PCOnBreak pc_on_brk(
@@ -84,7 +77,7 @@ PCOnBreak pc_on_brk(
 // Determine dest register
 wire [4:0] write_addr;
 assign write_addr =
-       ExceptionOrInterrupt ? 5'd26 : // $k0
+       (RegDst == 2'b11) ? 5'd26 : // $k0
        (RegDst == 2'b00) ? if_id.instr[20:16] :
        (RegDst == 2'b01) ? if_id.instr[15:11] :
        5'd31; // $ra

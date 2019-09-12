@@ -13,11 +13,8 @@ CPU cpu_0(
 initial
   begin
     $display("Loading instructions into instr_mem ...");
-    $readmemh("insertion_sort.hex", cpu_0.bus.instr_mem_0.ram_data);
+    $readmemh("timer.hex", cpu_0.bus.instr_mem_0.ram_data);
     $display("Instructions loaded!");
-    $display("Loading data into data_mem ...");
-    $readmemh("insertion_sort_data.hex", cpu_0.bus.data_mem_0.ram_data);
-    $display("Data loaded!");
     clk = 1;
     uart_on = 0;
     reset = 1;

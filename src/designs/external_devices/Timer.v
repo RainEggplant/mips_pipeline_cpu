@@ -31,7 +31,7 @@ always @ (posedge clk)
       else
         if (mem[2][0]) // timer is enabled
           begin
-            if (mem[1] == 32'hffffffff)
+            if (&mem[1])
               begin
                 mem[1] <= mem[0];
                 if (mem[2][1])

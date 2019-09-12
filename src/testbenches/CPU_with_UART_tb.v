@@ -30,7 +30,7 @@ initial
     # 10 uart_on = 1;
     Rx_Serial = 1;
     $display("Loading instructions into instr_mem ...");
-    $readmemh("test_code_0.hex", instr);
+    $readmemh("uart.hex", instr);
     #10 reset = 1;
     for (i = 0; i < 10; i = i + 1)
       begin
@@ -47,7 +47,7 @@ initial
     $display("Instructions loaded!");
     $finish;
     $display("Loading data into data_mem ...");
-    $readmemh("test_data_0.hex", data);
+    $readmemh("uart_data.hex", data);
     uart_ram_id = 1;
     for (i = 0; i < 3; i = i + 1)
       begin
