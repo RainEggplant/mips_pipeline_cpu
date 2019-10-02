@@ -1,6 +1,6 @@
 # MIPS Pipeline CPU
 
-**MIPS Pipeline CPU** is a vivado project for the _Fundamental Experiment of Digital Logic and Processor_ course of EE, Tsinghua University.
+**MIPS Pipeline CPU** is a vivado project (2018.3) for the _Fundamental Experiment of Digital Logic and Processor_ course of EE, Tsinghua University.
 
 ## Set up this project
 
@@ -13,4 +13,5 @@ After you set up the environment, remember to change `"systemverilog.launchConfi
 
 ## About
 
-This project uses [barbedo/vivado-git](https://github.com/barbedo/vivado-git) to make it git-friendly.
+This project uses [kevlaine/vivado-git](https://github.com/kevlaine/vivado-git) to make it git-friendly (works under Vivado 2018.3).
+
