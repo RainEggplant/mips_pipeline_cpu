@@ -1,6 +1,8 @@
 # MIPS Pipeline CPU
 
-**MIPS Pipeline CPU** is a vivado project (2018.3) for the _Fundamental Experiment of Digital Logic and Processor_ course of EE, Tsinghua University.
+**MIPS Pipeline CPU** is a vivado project (2018.3) for the _Fundamental Experiment of Digital Logic and Processor （数字逻辑与处理器基础实验）_ course of EE, Tsinghua University.
+
+See the [report](./reports/report.md).
 
 ## Set up this project
 
